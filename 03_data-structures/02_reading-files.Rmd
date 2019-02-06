@@ -202,7 +202,50 @@ us2000 <- jsonlite::fromJSON("https://api.census.gov/data/2000/surname?get=NAME,
 us2000
 us2010
 ```
-<!-- --- -->
+
+---
+
+# HTML FILES
+
+- A lot of data is available online in the form of html tables
+
+- Extracting the data requires recognizing the html table format, and stripping off the html
+
+- Packages such as `xml`, `rvest`, ... helps with this
+
+---
+
+# HTML FILES
+
+  Pulling election results off the web...
+
+```{r warnings=FALSE, message=FALSE}
+library(rvest)
+url <- "https://www.nytimes.com/elections/results/iowa-house-district-4"
+doc <- read_html(url)
+tables <- html_table(doc, fill=TRUE)
+head(tables[[2]])
+```
+
+
+---
+  
+# Other binary formats and R
+  
+  - Packages `foreign` or `haven`: Data export/import for other (statistical) software: Stata, Epi, Octave, SPSS, Systat, SAS
+
+- Package `readxl` import/export with Excel spreadsheets
+e.g. web index data at http://www.visualizing.org/datasets/web-index-2013
+
+
+---
+  
+# Why do we need to access all these formats? 
+  
+  - To solve a problem, may need to collate data from multiple sources
+
+- Rearranging and merging data from different sources helps to pull together the data necessary to solve the problem
+
 
 <!-- ## "Awkward" text formats and R -->
 
@@ -361,47 +404,3 @@ us2010
 <!-- ``` -->
 
 <!-- There are some stations with wrong(?) UTC offsets  -->
-
----
-
-# HTML FILES
-
-  - A lot of data is available online in the form of html tables
-
-- Extracting the data requires recognizing the html table format, and stripping off the html
-
-- Packages such as `xml`, `rvest`, ... helps with this
-
----
-
-# HTML FILES
-
-  Pulling election results off the web...
-
-```{r warnings=FALSE, message=FALSE}
-library(rvest)
-url <- "https://www.nytimes.com/elections/results/iowa-house-district-4"
-doc <- read_html(url)
-tables <- html_table(doc, fill=TRUE)
-head(tables[[2]])
-```
-
-
----
-  
-# Other binary formats and R
-  
-  - Packages `foreign` or `haven`: Data export/import for other (statistical) software: Stata, Epi, Octave, SPSS, Systat, SAS
-
-- Package `readxl` import/export with Excel spreadsheets
-e.g. web index data at http://www.visualizing.org/datasets/web-index-2013
-
-
----
-  
-# Why do we need to access all these formats? 
-  
-  - To solve a problem, may need to collate data from multiple sources
-
-- Rearranging and merging data from different sources helps to pull together the data necessary to solve the problem
-

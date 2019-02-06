@@ -76,7 +76,7 @@ system.time(d1 &lt;- read.csv("../data/nasadata.csv"))
 
 ```
 ##    user  system elapsed 
-##   0.200   0.008   0.208
+##   0.200   0.004   0.205
 ```
 
 ```r
@@ -85,7 +85,7 @@ system.time(d2 &lt;- readRDS("../data/nasadata.rds"))
 
 ```
 ##    user  system elapsed 
-##   0.032   0.000   0.031
+##   0.033   0.000   0.033
 ```
 
 speed-up is about factor 10 in favor of binary files
@@ -298,7 +298,61 @@ us2010
 ## [2,] "HOFMANN"    "9192"  "3857"  "95.21"    "0.36"     "HOFMANN"   
 ## [3,] "VANDERPLAS" "188"   "96799" "90.43"    "(S)"      "VANDERPLAS"
 ```
-&lt;!-- --- --&gt;
+
+---
+
+# HTML FILES
+
+- A lot of data is available online in the form of html tables
+
+- Extracting the data requires recognizing the html table format, and stripping off the html
+
+- Packages such as `xml`, `rvest`, ... helps with this
+
+---
+
+# HTML FILES
+
+  Pulling election results off the web...
+
+
+```r
+library(rvest)
+url &lt;- "https://www.nytimes.com/elections/results/iowa-house-district-4"
+doc &lt;- read_html(url)
+tables &lt;- html_table(doc, fill=TRUE)
+head(tables[[2]])
+```
+
+```
+##        County   King Scholten Aldrich Rpt.
+## 1       Story 13,474   27,569   1,178 100%
+## 2    Woodbury 15,708   18,686     562 100%
+## 3 Cerro Gordo  7,620   10,688     410 100%
+## 4       Sioux 10,824    3,682     182 100%
+## 5     Webster  6,706    6,918     277 100%
+## 6       Boone  5,350    6,353     285 100%
+```
+
+
+---
+  
+# Other binary formats and R
+  
+  - Packages `foreign` or `haven`: Data export/import for other (statistical) software: Stata, Epi, Octave, SPSS, Systat, SAS
+
+- Package `readxl` import/export with Excel spreadsheets
+e.g. web index data at http://www.visualizing.org/datasets/web-index-2013
+
+
+---
+  
+# Why do we need to access all these formats? 
+  
+  - To solve a problem, may need to collate data from multiple sources
+
+- Rearranging and merging data from different sources helps to pull together the data necessary to solve the problem
+
 
 &lt;!-- ## "Awkward" text formats and R --&gt;
 
@@ -457,60 +511,6 @@ us2010
 &lt;!-- ``` --&gt;
 
 &lt;!-- There are some stations with wrong(?) UTC offsets  --&gt;
-
----
-
-# HTML FILES
-
-  - A lot of data is available online in the form of html tables
-
-- Extracting the data requires recognizing the html table format, and stripping off the html
-
-- Packages such as `xml`, `rvest`, ... helps with this
-
----
-
-# HTML FILES
-
-  Pulling election results off the web...
-
-
-```r
-library(rvest)
-url &lt;- "https://www.nytimes.com/elections/results/iowa-house-district-4"
-doc &lt;- read_html(url)
-tables &lt;- html_table(doc, fill=TRUE)
-head(tables[[2]])
-```
-
-```
-##        County   King Scholten Aldrich Rpt.
-## 1       Story 13,474   27,569   1,178 100%
-## 2    Woodbury 15,708   18,686     562 100%
-## 3 Cerro Gordo  7,620   10,688     410 100%
-## 4       Sioux 10,824    3,682     182 100%
-## 5     Webster  6,706    6,918     277 100%
-## 6       Boone  5,350    6,353     285 100%
-```
-
-
----
-  
-# Other binary formats and R
-  
-  - Packages `foreign` or `haven`: Data export/import for other (statistical) software: Stata, Epi, Octave, SPSS, Systat, SAS
-
-- Package `readxl` import/export with Excel spreadsheets
-e.g. web index data at http://www.visualizing.org/datasets/web-index-2013
-
-
----
-  
-# Why do we need to access all these formats? 
-  
-  - To solve a problem, may need to collate data from multiple sources
-
-- Rearranging and merging data from different sources helps to pull together the data necessary to solve the problem
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
