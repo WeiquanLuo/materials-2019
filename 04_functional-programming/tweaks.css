@@ -7,3 +7,7 @@
   display: inline-block;
   float: right;
 }
+
+.inverse {
+  text-shadow:0 0 0 #FFF !important;
+}
