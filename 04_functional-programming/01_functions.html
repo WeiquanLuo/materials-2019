@@ -630,6 +630,62 @@ fizzbuzz(1,10)
 ```
 ##  [1] "1"    "2"    "fizz" "4"    "5"    "fizz" "buzz" "8"    "fizz" "10"
 ```
+
+---
+
+# Solution without a loop
+
+
+```r
+fizzbuzz_no_iter &lt;- function(a, b) {
+  lower &lt;- min(a, b)
+  upper &lt;- max(a, b)
+  
+  if (lower == upper) return(fizzbuzz1(lower))
+  
+  return( c(fizzbuzz1(lower), fizzbuzz_no_iter(lower+1, upper)))
+}
+
+fizzbuzz_no_iter(1, 10)
+```
+
+```
+##  [1] "1"    "2"    "fizz" "4"    "5"    "fizz" "buzz" "8"    "fizz" "10"
+```
+
+---
+
+# ... and another solution without a loop
+
+
+```r
+fizzbuzz_vector &lt;- function(a, b) {
+  # create a vector with numbers from a to b
+  x &lt;- seq.int(from = min(a,b), to = max(a,b))
+  res &lt;- x
+  
+  res[x %% 3 == 0] &lt;- "fizz"
+  res[x %% 7 == 0] &lt;- "buzz"
+  res[(x %% 3 == 0) &amp; (x %% 7 == 0)] &lt;- "fizzbuzz"
+  
+  res
+}
+
+fizzbuzz_vector(1,10)
+```
+
+```
+##  [1] "1"    "2"    "fizz" "4"    "5"    "fizz" "buzz" "8"    "fizz" "10"
+```
+---
+
+# Next steps ...
+
+Which of the functions is 'best'?
+
+Best as in: fastest, most readable, most maintainable
+
+... we will discuss profiling code and other aspects of good coding practices later
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>

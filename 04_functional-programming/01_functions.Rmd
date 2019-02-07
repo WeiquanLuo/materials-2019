@@ -587,6 +587,6 @@ fizzbuzz_vector(1,10)
 
 Which of the functions is 'best'?
 
-Best as in: fastest, readable, maintainable
+Best as in: fastest, most readable, most maintainable
 
 ... we will discuss profiling code and other aspects of good coding practices later
