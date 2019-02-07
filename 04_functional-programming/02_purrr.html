@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stat 585 - List variables</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="tweaks.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - List variables
+### Heike Hofmann
+
+---
+
+
+
+
+## Example: the gapminder project
+
+Part of a quantitative world is our responsibility to make data accessible
+
+- Hans Rosling (2017✝) was at the fore-front of providing World Health Statistics (gapminder)
+
+- in R through the package `gapminder` by Jenny Bryan
+
+- Hans Rosling's [TED talk](https://www.ted.com/talks/hans_rosling_shows_the_best_stats_you_ve_ever_seen?language=en)
+
+
+---
+
+## First Look: US only
+
+
+```r
+library(gapminder)
+
+gapminder %&gt;% filter(country == "United States") %&gt;% 
+ ggplot(aes(x = year, y =lifeExp)) + geom_line() + geom_point()
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+How would you describe this plot?
+
+---
+
+## First Model: US only
+
+
+```r
+gapminder %&gt;% filter(country == "United States") %&gt;% 
+ ggplot(aes(x = year, y =lifeExp)) + geom_line() + geom_point() +
+  geom_smooth(method="lm", se=FALSE)
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+---
+
+## Model of the US
+
+
+```r
+lm(lifeExp~I(year-1950), data = filter(gapminder, country == "United States"))
+```
+
+```
+## 
+## Call:
+## lm(formula = lifeExp ~ I(year - 1950), data = filter(gapminder, 
+##     country == "United States"))
+## 
+## Coefficients:
+##    (Intercept)  I(year - 1950)  
+##        68.0455          0.1842
+```
+
+---
+class: inverse
+## Your turn:  another country
+
+Pick another country in the gapminder data and derive estimates. 
+
+How do the estimates compare to the US?
+
+---
+
+## All countries
+
+
+```r
+gapminder %&gt;% 
+ ggplot(aes(x = year, y =lifeExp)) + 
+  geom_line(aes(group = country, colour=continent)) 
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+--
+
+Most  countries show an increase in life expectancy over time, but not all
+
+--
+
+We would like to group similar countries 
+
+
+---
+
+## Using models as exploratory tools
+
+Now we would like to repeat this modelling approach to all countries, i.e. 
+
+- *split* by country, 
+
+- *apply* the model, 
+
+- *combine* the results. 
+
+But we certainly don't want to subset the data for every country ... 
+
+---
+
+## First approach
+
+
+```r
+gapminderplus &lt;- gapminder %&gt;% 
+  group_by(country) %&gt;%
+  mutate(year = year - 1950) %&gt;% 
+  summarize(
+    intercept = coef(lm(lifeExp ~ year))[1],
+    slope = coef(lm(lifeExp ~ year))[2]
+  )
+```
+
+---
+
+
+```r
+gapminderplus %&gt;% ggplot(aes(x = intercept, y = slope)) + 
+  geom_point()
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+---
+
+
+```r
+gapminderplus %&gt;% 
+  ggplot(aes(x = intercept, y = slope)) + 
+  geom_point() +
+  geom_text(aes(label = country), 
+            data = filter(gapminderplus, slope &lt; 0),
+            nudge_y = 0.035)
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+
+## Cons: First approach
+
+- double evaluation of the model is bad
+
+- what if we want to get additional values from the model, such as `\(R^2\)`?
+
+- what if we want to get additional values from the data, such as continent?
+
+
+```r
+gapminderplus &lt;- gapminder %&gt;% 
+  group_by(country) %&gt;%
+  mutate(year = year - 1950) %&gt;% 
+  summarize(
+    model = coef(lm(lifeExp ~ year))[1],
+    slope = coef(lm(lifeExp ~ year))[2]
+  )
+```
+
+---
+
+# List variables
+
+one step into the right direction is the use of list variables:
+
+
+```r
+gapminderplus &lt;- gapminder %&gt;% 
+   group_by(country) %&gt;%
+   mutate(year = year - 1950) %&gt;% 
+   summarize(
+     model = list(lm(lifeExp ~ year))
+   )
+
+gapminderplus
+```
+
+```
+## # A tibble: 142 x 2
+##    country     model   
+##    &lt;fct&gt;       &lt;list&gt;  
+##  1 Afghanistan &lt;S3: lm&gt;
+##  2 Albania     &lt;S3: lm&gt;
+##  3 Algeria     &lt;S3: lm&gt;
+##  4 Angola      &lt;S3: lm&gt;
+##  5 Argentina   &lt;S3: lm&gt;
+##  6 Australia   &lt;S3: lm&gt;
+##  7 Austria     &lt;S3: lm&gt;
+##  8 Bahrain     &lt;S3: lm&gt;
+##  9 Bangladesh  &lt;S3: lm&gt;
+## 10 Belgium     &lt;S3: lm&gt;
+## # ... with 132 more rows
+```
+
+---
+
+## Split-Apply-Combine for lists
+
+
+- `nest` creates list of data frames (split)
+
+- `map` applies function to list object (apply)
+
+- `unnest` moves list results back into a data frame (combine)
+
+
+---
+
+## nest
+
+- `nest` is a function in `tidyr`: creates variable `data`
+
+- `data` is (list) variable of data frames
+
+
+```r
+countryList &lt;- gapminder %&gt;% mutate(year = year-1950) %&gt;% 
+  nest(-country, -continent) 
+countryList 
+```
+
+```
+## # A tibble: 142 x 3
+##    country     continent data             
+##    &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;           
+##  1 Afghanistan Asia      &lt;tibble [12 × 4]&gt;
+##  2 Albania     Europe    &lt;tibble [12 × 4]&gt;
+##  3 Algeria     Africa    &lt;tibble [12 × 4]&gt;
+##  4 Angola      Africa    &lt;tibble [12 × 4]&gt;
+##  5 Argentina   Americas  &lt;tibble [12 × 4]&gt;
+##  6 Australia   Oceania   &lt;tibble [12 × 4]&gt;
+##  7 Austria     Europe    &lt;tibble [12 × 4]&gt;
+##  8 Bahrain     Asia      &lt;tibble [12 × 4]&gt;
+##  9 Bangladesh  Asia      &lt;tibble [12 × 4]&gt;
+## 10 Belgium     Europe    &lt;tibble [12 × 4]&gt;
+## # ... with 132 more rows
+```
+
+---
+
+## Nested data frames
+
+Each element of the `data` variable in `countryList` is a dataset:
+
+
+```r
+countryList$data[[10]] %&gt;% arrange(year)
+```
+
+```
+## # A tibble: 12 x 4
+##     year lifeExp      pop gdpPercap
+##    &lt;dbl&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+##  1     2    68    8730405     8343.
+##  2     7    69.2  8989111     9715.
+##  3    12    70.2  9218400    10991.
+##  4    17    70.9  9556500    13149.
+##  5    22    71.4  9709100    16672.
+##  6    27    72.8  9821800    19118.
+##  7    32    73.9  9856303    20980.
+##  8    37    75.4  9870200    22526.
+##  9    42    76.5 10045622    25576.
+## 10    47    77.5 10199787    27561.
+## 11    52    78.3 10311970    30486.
+## 12    57    79.4 10392226    33693.
+```
+
+---
+class: inverse
+## Your Turn
+
+Find the data for Canada from `countryList`
+
+Why does `countryList$data[[countryList$country=="Canada"]]` not work?
+
+---
+
+## Nested data frames (cont'd)
+
+We can use the list elements as data inputs:
+
+
+```r
+lm(lifeExp~year, data=countryList$data[[10]])
+```
+
+```
+## 
+## Call:
+## lm(formula = lifeExp ~ year, data = countryList$data[[10]])
+## 
+## Coefficients:
+## (Intercept)         year  
+##     67.4738       0.2091
+```
+
+
+---
+class: inverse
+## Your Turn (8 mins) 
+
+
+The goal of this your turn is for you to try out nesting operations on various datasets.
+
+- Nest the `ChickWeight` data in different ways: what are the results of 
+
+```
+ChickWeight %&gt;% nest(-Diet)
+ChickWeight %&gt;% nest(weight)
+ChickWeight %&gt;% nest(Time, weight)
+```
+
+- `chickwts` is yet another data set on feeding chicks. Nest it by different feeds. 
+
+- `nest` respects grouping structure introduced by `group_by`. Use `group_by` to nest the `iris` dataset by species. 
+
+
+---
+
+## Fitting multiple models
+
+Now we are using the `map` function in the package `purrr`.
+
+`map` allows us to apply a function to each element of a list.
+
+
+```r
+myfit &lt;- function (dframe) {
+  lm(lifeExp ~ year, data = dframe)
+}
+
+countryList &lt;- countryList %&gt;% mutate(
+    model = purrr::map(data, myfit)
+)
+head(countryList)
+```
+
+```
+## # A tibble: 6 x 4
+##   country     continent data              model   
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;            &lt;list&gt;  
+## 1 Afghanistan Asia      &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 2 Albania     Europe    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 3 Algeria     Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 4 Angola      Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 5 Argentina   Americas  &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 6 Australia   Oceania   &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+```
+
+---
+
+## Fitting multiple models - Alternative
+
+`map` allows us to use a formula instead of a function (creates anonymous function on the fly):
+
+
+```r
+countryList &lt;- countryList %&gt;% mutate(
+    model = purrr::map(data, function(d) lm(lifeExp~year, data = d))
+)
+head(countryList)
+```
+
+```
+## # A tibble: 6 x 4
+##   country     continent data              model   
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;            &lt;list&gt;  
+## 1 Afghanistan Asia      &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 2 Albania     Europe    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 3 Algeria     Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 4 Angola      Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 5 Argentina   Americas  &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+## 6 Australia   Oceania   &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;
+```
+
+---
+
+# Extracting model estimates
+
+
+```r
+countryList %&gt;%
+  mutate(
+    intercept = model %&gt;% purrr::map_dbl(.f = function(m) coef(m)[1]),
+    slope = model %&gt;% purrr::map_dbl(.f = function(m) coef(m)[2])
+  ) %&gt;% head(5)
+```
+
+```
+## # A tibble: 5 x 6
+##   country     continent data              model    intercept slope
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;            &lt;list&gt;       &lt;dbl&gt; &lt;dbl&gt;
+## 1 Afghanistan Asia      &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;      29.4 0.275
+## 2 Albania     Europe    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;      58.6 0.335
+## 3 Algeria     Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;      42.2 0.569
+## 4 Angola      Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;      31.7 0.209
+## 5 Argentina   Americas  &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt;      62.2 0.232
+```
+... bit complicated?
+
+---
+
+## The broom package
+
+Now we have all these models ... 
+
+&lt;img src="images/broom.jpeg" class="cover" width=1000&gt;
+
+
+---
+
+## The `broom` package
+
+`broom` allows to extract values from models on three levels:
+
+- for each model: `broom::glance`
+
+- for each coefficient in the model: `broom::tidy`
+
+- for each value in the dataset: `broom::augment`
+
+
+```r
+library(broom)
+broom::glance(countryList$model[[1]])
+```
+
+```
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+## *     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     0.948         0.942  1.22      181. 9.84e-8     2  -18.3  42.7  44.1
+## # ... with 2 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;
+```
+
+```r
+broom::tidy(countryList$model[[1]])
+```
+
+```
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   29.4      0.699       42.0 1.40e-12
+## 2 year           0.275    0.0205      13.5 9.84e- 8
+```
+
+## 
+
+
+```r
+broom::augment(countryList$model[[1]])
+```
+
+```
+## # A tibble: 12 x 9
+##    lifeExp  year .fitted .se.fit  .resid   .hat .sigma   .cooksd .std.resid
+##  *   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+##  1    28.8     2    29.9   0.664 -1.11   0.295    1.21 0.243        -1.08  
+##  2    30.3     7    31.3   0.580 -0.952  0.225    1.24 0.113        -0.884 
+##  3    32.0    12    32.7   0.503 -0.664  0.169    1.27 0.0360       -0.595 
+##  4    34.0    17    34.0   0.436 -0.0172 0.127    1.29 0.0000165    -0.0151
+##  5    36.1    22    35.4   0.385  0.674  0.0991   1.27 0.0185        0.581 
+##  6    38.4    27    36.8   0.357  1.65   0.0851   1.15 0.0923        1.41  
+##  7    39.9    32    38.2   0.357  1.69   0.0851   1.15 0.0967        1.44  
+##  8    40.8    37    39.5   0.385  1.28   0.0991   1.21 0.0667        1.10  
+##  9    41.7    42    40.9   0.436  0.754  0.127    1.26 0.0317        0.660 
+## 10    41.8    47    42.3   0.503 -0.534  0.169    1.27 0.0233       -0.479 
+## 11    42.1    52    43.7   0.580 -1.54   0.225    1.15 0.299        -1.43  
+## 12    43.8    57    45.1   0.664 -1.22   0.295    1.19 0.296        -1.19
+```
+
+---
+
+##Extract values for each coefficient
+
+Extract coefficients for all countries automatically (hello `map` again!)
+
+
+```r
+# works, but we lose the context
+coefs = countryList$model %&gt;% purrr::map(.f=broom::tidy)
+head(coefs)
+```
+
+```
+## [[1]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   29.4      0.699       42.0 1.40e-12
+## 2 year           0.275    0.0205      13.5 9.84e- 8
+## 
+## [[2]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   58.6      1.13        51.7 1.79e-13
+## 2 year           0.335    0.0332      10.1 1.46e- 6
+## 
+## [[3]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   42.2      0.756       55.8 8.22e-14
+## 2 year           0.569    0.0221      25.7 1.81e-10
+## 
+## [[4]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   31.7      0.804      39.4  2.63e-12
+## 2 year           0.209    0.0235      8.90 4.59e- 6
+## 
+## [[5]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   62.2     0.167       372.  4.80e-22
+## 2 year           0.232   0.00489      47.4 4.22e-13
+## 
+## [[6]]
+## # A tibble: 2 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   67.9      0.355      192.  3.70e-19
+## 2 year           0.228    0.0104      21.9 8.67e-10
+```
+
+---
+---
+
+##Extract values for each coefficient (cont'd)
+
+
+```r
+# better, but everything is still stuffed into this strange format
+countryList &lt;- countryList %&gt;% mutate(
+  coefs = model %&gt;% purrr::map(.f=broom::tidy)
+) 
+countryList %&gt;% head()
+```
+
+```
+## # A tibble: 6 x 5
+##   country     continent data              model    coefs           
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;            &lt;list&gt;   &lt;list&gt;          
+## 1 Afghanistan Asia      &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+## 2 Albania     Europe    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+## 3 Algeria     Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+## 4 Angola      Africa    &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+## 5 Argentina   Americas  &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+## 6 Australia   Oceania   &lt;tibble [12 × 4]&gt; &lt;S3: lm&gt; &lt;tibble [2 × 5]&gt;
+```
+
+---
+
+## Ready to fly!
+
+The opposite of `nest` is `unnest`:
+
+
+```r
+coefs &lt;- countryList %&gt;% select(country, continent, coefs) %&gt;% 
+  unnest()
+coefs
+```
+
+```
+## # A tibble: 284 x 7
+##    country     continent term        estimate std.error statistic  p.value
+##    &lt;fct&gt;       &lt;fct&gt;     &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1 Afghanistan Asia      (Intercept)   29.4     0.699       42.0  1.40e-12
+##  2 Afghanistan Asia      year           0.275   0.0205      13.5  9.84e- 8
+##  3 Albania     Europe    (Intercept)   58.6     1.13        51.7  1.79e-13
+##  4 Albania     Europe    year           0.335   0.0332      10.1  1.46e- 6
+##  5 Algeria     Africa    (Intercept)   42.2     0.756       55.8  8.22e-14
+##  6 Algeria     Africa    year           0.569   0.0221      25.7  1.81e-10
+##  7 Angola      Africa    (Intercept)   31.7     0.804       39.4  2.63e-12
+##  8 Angola      Africa    year           0.209   0.0235       8.90 4.59e- 6
+##  9 Argentina   Americas  (Intercept)   62.2     0.167      372.   4.80e-22
+## 10 Argentina   Americas  year           0.232   0.00489     47.4  4.22e-13
+## # ... with 274 more rows
+```
+
+---
+
+## Reshaping
+
+
+```r
+coefsLong &lt;- coefs %&gt;% gather(key="Statistic", value = "Value", 4:7)
+coefsTerm &lt;- coefsLong %&gt;% spread(key="term", value="Value")
+coefsTerm %&gt;% filter(Statistic == "estimate") %&gt;% 
+  ggplot(aes(x = `(Intercept)`, y = year)) + 
+  geom_point(aes(colour = continent)) + ylab("Slope (year)")
+```
+
+![](02_purrr_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+
+---
+class: inverse
+## Your turn (10 mins)
+
+- Extract other model diagnostics: find the R square value for each model. Draw a visualization of R square by country - can you see a pattern? What does the pattern mean?
+
+- Extract residuals and fitted values for each of the models and store them in a dataset together with country and continent information. 
+
+- Plot residuals across the years and fit a smooth. What does the pattern mean?
+
+- Include predicted Life Expectancy for 2017 into the data set. Then compare predicted life expectancy in 2017 with that in 1950.
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
