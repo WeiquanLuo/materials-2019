@@ -581,3 +581,12 @@ fizzbuzz_vector <- function(a, b) {
 
 fizzbuzz_vector(1,10)
 ```
+---
+
+# Next steps ...
+
+Which of the functions is 'best'?
+
+Best as in: fastest, readable, maintainable
+
+... we will discuss profiling code and other aspects of good coding practices later
