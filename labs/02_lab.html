@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lab Assignment #2: Exploring the world</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lab Assignment #2: Exploring the world
+### Heike Hofmann
+
+---
+
+
+# Outline
+
+- The package `sf` for drawing maps (and keeping your sanity?)
+
+- Looking under the hood ...
+
+
+
+The final deliverable is again a self-contained RMarkdown file. 
+
+---
+
+# The package `sf`
+
+The `sf` package is a new(ish) development that is likely going to replace packages `sp` and `maptools` for working with spatial data (https://r-spatial.github.io/sf/articles/sf1.html).
+
+1. Install the `sf` package from CRAN. You might have to install additional dependencies.
+
+2. A lot of government agencies use shapefiles to publish spatial information, such as states, counties, congressional districts, exact locations of state and national parks, etc. 
+
+&lt;!--You might to also have to install `rgdal` (R package) and the gdal framework (https://www.gdal.org/).--&gt;
+
+---
+
+# Fun with Middle Earth
+
+Not just the government, dedicated fan bases alike provide information in shapefiles. 
+The ME-DEM team recreates Tolkien's Middle Earth in shapefile format at https://github.com/jvangeld/ME-GIS
+
+
+```r
+library(ggplot2)
+library(sf)
+```
+
+```
+## Linking to GEOS 3.6.1, GDAL 2.1.3, PROJ 4.9.3
+```
+
+```r
+p &lt;- ggplot() +
+  geom_sf(data = read_sf("../../data/ME-GIS/Coastline2.shp"), 
+          colour="grey10", fill="grey90") +
+  geom_sf(data = read_sf("../../data/ME-GIS/Rivers19.shp"), 
+          colour="steelblue", size=0.3) +
+  geom_sf(data = read_sf("../../data/ME-GIS/PrimaryRoads.shp"), 
+          size = 0.7, colour="grey30") +
+  geom_sf(data = read_sf("../../data/ME-GIS/Cities.shp")) +
+  theme_bw() 
+```
+---
+
+Now let's plot Middle Earth:
+
+```r
+p
+```
+
+![](02_lab_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+---
+
+# More map elements
+
+Add labels for the cities (see  `geom_sf_text`)
+
+Getting Fancy:
+
+To appreciate how far Frodo and Sam had to travel, include a scale with `annotation_scale`.
+Also show North in a more map typical way with `annotation_north_arrow`
+
+Include the code to produce the final map in your  RMarkdown file.
+        
+---
+
+# Looking under the hood ...
+
+The main objective of this part is to write code that allows us to read in data from a shapefile and access the data in a way that allows us to use it in the `ggplot2` framework, i.e essentially we want to figure out what goes on behind the scenes after using `sf_read`.
+
+We will be using the australia shapefile for a concrete example and then try to bundle  general ideas into a function. 
+
+---
+
+# Quick review
+
+A map in ggplot2 consists a couple of variables to make things work:
+
+
+```r
+library(ggplot2)
+library(maps)
+states &lt;- map_data("state")
+head(states)
+```
+
+```
+##        long      lat group order  region subregion
+## 1 -87.46201 30.38968     1     1 alabama      &lt;NA&gt;
+## 2 -87.48493 30.37249     1     2 alabama      &lt;NA&gt;
+## 3 -87.52503 30.37249     1     3 alabama      &lt;NA&gt;
+## 4 -87.53076 30.33239     1     4 alabama      &lt;NA&gt;
+## 5 -87.57087 30.32665     1     5 alabama      &lt;NA&gt;
+## 6 -87.58806 30.32665     1     6 alabama      &lt;NA&gt;
+```
+
+- x and y variable for longitude and latitude. 
+- `group` identifies a polygon part. 
+- `order` specifies in which order the points in a polygon connect. 
+- `region` usually allows us to connect information from the outside to the map. 
+- `subregion` has no function for the states map, but takes on functionality for other maps
+
+---
+
+
+```r
+library(dplyr)
+michigan &lt;- 
+  states %&gt;% 
+  filter(region=="michigan") %&gt;%
+  group_by(group) %&gt;% 
+  summarize(
+    region = region[1],
+    n = n())
+
+michigan
+```
+
+```
+## # A tibble: 2 x 3
+##   group region       n
+##   &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt;
+## 1    23 michigan   460
+## 2    24 michigan   370
+```
+
+
+
+---
+
+
+```r
+ggplot(states, aes(x=long, y=lat, group=group)) + geom_polygon()
+```
+
+&lt;img src="02_lab_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+
+# Australia shapefile
+
+For a concrete example, we will load in the data from the  shapefile for Australia
+
+
+```r
+ozbig &lt;- read_sf("../data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st &lt;- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz &lt;- st_as_sf(oz_st)
+
+oz
+```
+
+```
+## Simple feature collection with 11 features and 10 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 112.9225 ymin: -55.11694 xmax: 159.1086 ymax: -9.142306
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##    GID_0    NAME_0    GID_1                       NAME_1 VARNAME_1
+## 1    AUS Australia  AUS.1_1  Ashmore and Cartier Islands      &lt;NA&gt;
+## 2    AUS Australia  AUS.2_1 Australian Capital Territory      &lt;NA&gt;
+## 3    AUS Australia  AUS.3_1  Coral Sea Islands Territory      &lt;NA&gt;
+## 4    AUS Australia  AUS.4_1         Jervis Bay Territory      &lt;NA&gt;
+## 5    AUS Australia  AUS.5_1              New South Wales      &lt;NA&gt;
+## 6    AUS Australia  AUS.6_1           Northern Territory      &lt;NA&gt;
+## 7    AUS Australia  AUS.7_1                   Queensland      &lt;NA&gt;
+## 8    AUS Australia  AUS.8_1              South Australia      &lt;NA&gt;
+## 9    AUS Australia  AUS.9_1                     Tasmania      &lt;NA&gt;
+## 10   AUS Australia AUS.10_1                     Victoria      &lt;NA&gt;
+##    NL_NAME_1    TYPE_1 ENGTYPE_1 CC_1 HASC_1
+## 1       &lt;NA&gt; Territory Territory   12  AU.AS
+## 2       &lt;NA&gt; Territory Territory    8  AU.AC
+## 3       &lt;NA&gt; Territory Territory   11  AU.CR
+## 4       &lt;NA&gt; Territory Territory   10  AU.JB
+## 5       &lt;NA&gt;     State     State    1  AU.NS
+## 6       &lt;NA&gt; Territory Territory    7  AU.NT
+## 7       &lt;NA&gt;     State     State    3  AU.QL
+## 8       &lt;NA&gt;     State     State    4  AU.SA
+## 9       &lt;NA&gt;     State     State    6  AU.TS
+## 10      &lt;NA&gt;     State     State    2  AU.VI
+##                          geometry
+## 1  MULTIPOLYGON (((123.5556 -1...
+## 2  MULTIPOLYGON (((149.138 -35...
+## 3  MULTIPOLYGON (((155.5394 -2...
+## 4  MULTIPOLYGON (((150.7692 -3...
+## 5  MULTIPOLYGON (((149.9447 -3...
+## 6  MULTIPOLYGON (((137.0677 -1...
+## 7  MULTIPOLYGON (((153.4179 -2...
+## 8  MULTIPOLYGON (((140.66 -38....
+## 9  MULTIPOLYGON (((158.6928 -5...
+## 10 MULTIPOLYGON (((146.2929 -3...
+```
+---
+
+`oz$geometry` is a list variable
+
+
+```r
+is.list(oz$geometry)
+```
+
+```
+## [1] TRUE
+```
+
+Each element in this list consists of another list: 
+
+
+```r
+str(oz$geometry[[1]])
+```
+
+```
+## List of 7
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 124 124 124 124 124 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  $ :List of 1
+##   ..$ : num [1:5, 1:2] 123 123 123 123 123 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] "x" "y"
+##  - attr(*, "class")= chr [1:3] "XY" "MULTIPOLYGON" "sfg"
+```
+
+---
+
+# Inner workings
+
+Now we work our way into the inner structure of the `geometry` object.
+
+Each element of the form `oz$geometry[[i]][[j]]` is another list with one element: a matrix with two columns
+
+
+```r
+head(oz$geometry[[1]][[3]][[1]])
+```
+
+```
+##             x         y
+## [1,] 122.9669 -12.23972
+## [2,] 122.9711 -12.24361
+## [3,] 122.9700 -12.24528
+## [4,] 122.9617 -12.24111
+## [5,] 122.9669 -12.23972
+```
+
+These values give x and y coordinates of points of a polygon. 
+
+---
+
+# Your Task
+
+Get these matrices into a single data frame `ozplus` with variables `long`, `lat`, `group`, `order`  and plot with the command:
+
+```
+ozplus %&gt;% ggplot(aes(x = long, y = lat, group = group)) + geom_polygon()
+```
+
+Include all the code necessary to read the shape file and convert to the data frame plotted in your Rmarkdown file. 
+Include a plot of the result as well. 
+
+---
+
+# Testing your code
+
+How reliable is your code? - does it work on anything but the `oz` example? 
+
+There's only one way to answer that question! Try it out!
+
+In the next step, you are asked to get a shapefile of a country of your choice and use your code on the new shape file. 
+
+---
+
+# GADM
+
+GADM is a service "to provide boundaries without borders" 
+
+- Go to the website at https://gadm.org/download_country_v3.html and download a shape file of a country of your choice.
+
+- Unzip the document and move the resulting folder into your working directory 
+
+- Read the shapefile (there are usually shapefiles at different administrative levels - pick one). Thin the shapefile (or you might crash your R session; shapefiles can be big), then export the polygons and plot in `ggplot2`.
+
+Include the code and the result in your RMarkdown file.
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
