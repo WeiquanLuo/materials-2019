@@ -558,4 +558,35 @@ fizzbuzz_no_iter <- function(a, b) {
   
   return( c(fizzbuzz1(lower), fizzbuzz_no_iter(lower+1, upper)))
 }
+
+fizzbuzz_no_iter(1, 10)
 ```
+
+---
+
+# ... and another solution without a loop
+
+```{r}
+fizzbuzz_vector <- function(a, b) {
+  # create a vector with numbers from a to b
+  x <- seq.int(from = min(a,b), to = max(a,b))
+  res <- x
+  
+  res[x %% 3 == 0] <- "fizz"
+  res[x %% 7 == 0] <- "buzz"
+  res[(x %% 3 == 0) & (x %% 7 == 0)] <- "fizzbuzz"
+  
+  res
+}
+
+fizzbuzz_vector(1,10)
+```
+---
+
+# Next steps ...
+
+Which of the functions is 'best'?
+
+Best as in: fastest, most readable, most maintainable
+
+... we will discuss profiling code and other aspects of good coding practices later
