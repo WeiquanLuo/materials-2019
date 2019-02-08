@@ -1,0 +1,88 @@
+---
+title: "Stat 585 - blog 3 - recap"
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Ethics of Reproducibility
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+1. not being able to reproduce results holds science back
+
+--
+
+  - best case scenario: published results are correct - but can't be reproduced because of accessibility issues 
+
+  - worst case scenario: published results are incorrect - might steer the field in a wrong direction
+
+  - either way: loss of resources spent (on trying) to reproduce results that could be spent on new discoveries
+
+--
+
+2. It is our **responsibility** to ensure that our research results are reproducible
+
+--
+3. The only choice we have in the matter is "how do we ensure reproducibility?"
+
+
+
+---
+
+# Ten simple rules
+
+ by [Sandve et al](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285)
+
+
+1. For Every Result, Keep Track of How It Was Produced
+
+2. Avoid Manual Data Manipulation Steps
+
+3. Archive the Exact Versions of All External Programs Used
+
+4. Version Control All Custom Scripts
+
+5. Record All Intermediate Results, When Possible in Standardized Formats
+
+6. For Analyses That Include Randomness, Note Underlying Random Seeds
+
+7. Always Store Raw Data behind Plots
+
+8. Generate Hierarchical Analysis Output, Allowing Layers of Increasing Detail to Be Inspected
+
+9. Connect Textual Statements to Underlying Results
+
+10.  Provide Public Access to Scripts, Runs, and Results
+
+---
+
+## Generally
+
+- ALL of these rules help with (computation) reproducibility
+
+- When do we  follow rules? - when it's easy!
+
+- Whenever things are (technically) difficult, or we have to be super disciplined, rules fall to the side
+
+- Some rules are impossible to follow because of other constraints out of our control
+
+---
+
+## The hardest rule to follow
+
+Responses from the class:
+
+| Rule  	| Number responses 	|
+|--------	|-------	|
+| Rule 1	|       	|
+| Rule 2	|       	|
+| Rule 3	|  IIIII IIIII     	|
+| Rule 4	|       	|
+
