@@ -86,3 +86,22 @@ Responses from the class:
 | Rule 3	|  IIIII IIIII     	|
 | Rule 4	|       	|
 
+---
+
+## More specific reasons 
+
+---
+
+For rule 3: 
+`sessioninfo()` helps with figuring out versions in R
+
+Personally, I prefer `devtools::session_info()` - that list is providing the same info in a humanly readable form :)
+
+
+---
+
+## Notes on points
+
+We deducted a couple of points from blog posts this time.
+
+Mostly for a lack of depth in the discussion. You are expected to give reasons for statements that go beyond opinions and personal preferences.
