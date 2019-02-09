@@ -1,19 +1,24 @@
----
-title: "Stat 585 - blog 3 - recap"
-author: "Heike Hofmann"
-output:
-  xaringan::moon_reader:
-    lib_dir: libs
-    nature:
-      highlightStyle: github
-      highlightLines: true
-      countIncrementalSlides: false
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stat 585 - blog 3 - recap</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - blog 3 - recap
+### Heike Hofmann
+
 ---
 
+
 # Ethics of Reproducibility
-```{r setup, include=FALSE}
-options(htmltools.dir.version = FALSE)
-```
+
 
 1. not being able to reproduce results holds science back
 
@@ -101,8 +106,8 @@ can be quite daunting in collaborative efforts, but really is the foundation of 
 
 RMarkdown helps to keep track of the connection between data, method and summary.
 
-<br>
-<br>
+&lt;br&gt;
+&lt;br&gt;
 Rule 2: **Avoid Manual Data Manipulation Steps**
 
 Technically difficult, manual steps are "unavoidable"? No!! Only use scripts for data manipulations.
@@ -119,8 +124,8 @@ lower standard: document which versions of which programs were used
 
 Personally, I prefer `devtools::session_info()` - it is providing a data frame of the same info in a more readable form
 
-<br>
-<br>
+&lt;br&gt;
+&lt;br&gt;
 
 Rule 4: **Version Control All Custom Scripts**
 
@@ -144,8 +149,8 @@ one solution: RMarkdown supports automatic caching
 Technical issues: disk space
 
 
-<br>
-<br>
+&lt;br&gt;
+&lt;br&gt;
 Rule 6. **For Analyses That Include Randomness, Note Underlying Random Seeds**
 
 should be a no-brainer
@@ -159,8 +164,8 @@ Rule 7: **Always Store Raw Data behind Plots**
 Plots are intermediate results, so already covered by rule 5
 
 
-<br>
-<br>
+&lt;br&gt;
+&lt;br&gt;
 
 Rule 8: **Generate Hierarchical Analysis Output, Allowing Layers of Increasing Detail to Be Inspected**
 
@@ -180,8 +185,8 @@ This is what it is all about - making sure that other people can reproduce your 
 Problems you mentioned: privacy restrictions on data, changes in software dependencies
 
 
-<br>
-<br>
+&lt;br&gt;
+&lt;br&gt;
 
 ## Summary
 
@@ -198,3 +203,51 @@ Let's just aim at getting better and checking a couple more of these boxes in th
 We deducted a couple of points from blog posts this time.
 
 Mostly for a lack of depth in the discussion. You are expected to give reasons for statements that go beyond opinions and personal preferences.
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
