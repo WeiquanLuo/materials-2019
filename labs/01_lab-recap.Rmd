@@ -1,0 +1,51 @@
+---
+title: 'Lab Assignment #1 - Recap'
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE, echo = TRUE)
+```
+# How did it go?
+
+Mostly pretty well from what we have seen
+
+---
+class: inverse, middle
+# Weather stations
+
+---
+
+# Issues with building the book
+
+0. Old R versions 
+
+1. Tons of packages to install
+
+Weiquan Luo has written a [script](Libraryscrapping.R) that allows to install all necessary libraries needed in a folder. `r emo::ji("pray")` `r emo::ji("pray")` `r emo::ji("pray")`
+
+2. Some issue with the availability of a C compiler. Particularly on Windows machines it is not easy to navigate through the necessary tools to compile a package from source. 
+
+
+
+
+---
+class: inverse, middle
+# Weather stations
+
+---
+
+## Issues
+
+
+`UTC_offset` is the variable containing the time zones - if you use that variable, the problem is much simpler. 
+It was not my intent to mislead you. 
+
+
+
