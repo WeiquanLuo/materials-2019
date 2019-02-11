@@ -159,7 +159,7 @@ The call `https://api.census.gov/data/2010/surname?get=NAME,COUNT&RANK=1:100` re
 ]
 ```
 
-Change the above call to include additional data on demographics (see [variables for surname data](api.census.gov/data/2010/surname/variables.html)) and read it into your R session.  
+Change the above call to include additional data on demographics (see [variables for surname data](https://api.census.gov/data/2010/surname/variables.html)) and read it into your R session.  
 
 Is your last name included? At what rank? what is the change in rank since 2000?
 
