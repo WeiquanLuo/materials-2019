@@ -33,10 +33,13 @@ class: inverse, middle
 
 1. Tons of packages to install
 
-Weiquan Luo has written a [script](Libraryscrapping.R) that allows to install all necessary libraries needed in a folder. 🙏 🙏 🙏
+    Weiquan Luo has written a [script](Libraryscrapping.R) that allows to install all necessary libraries needed in a folder. 🙏 🙏 🙏
 
 2. Some issue with the availability of a C compiler. Particularly on Windows machines it is not easy to navigate through the necessary tools to compile a package from source. 
 
+    "Fixes" to this problem is to set the code chunk option `error` to `TRUE` - this will not stop the evaluation, even if an error occurs
+
+    Alternatively, we can comment out pieces in the code that cause an error. 
 
 
 
@@ -50,7 +53,24 @@ class: inverse, middle
 
 
 `UTC_offset` is the variable containing the time zones - if you use that variable, the problem is much simpler. 
-It was not my intent to mislead you.
+It was not my intent to mislead you. 
+
+
+What does this command do?
+
+`weather%&gt;%filter(grepl("AMES", weather$NAME))`
+
+
+---
+
+## Next Lab
+
+
+Well done! 
+
+The next lab is scheduled for Feb 20 (next week Wednesday)
+
+We will cover lists and functions in a spatial setting
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({

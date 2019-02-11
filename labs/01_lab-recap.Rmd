@@ -28,10 +28,13 @@ class: inverse, middle
 
 1. Tons of packages to install
 
-Weiquan Luo has written a [script](Libraryscrapping.R) that allows to install all necessary libraries needed in a folder. `r emo::ji("pray")` `r emo::ji("pray")` `r emo::ji("pray")`
+    Weiquan Luo has written a [script](Libraryscrapping.R) that allows to install all necessary libraries needed in a folder. `r emo::ji("pray")` `r emo::ji("pray")` `r emo::ji("pray")`
 
 2. Some issue with the availability of a C compiler. Particularly on Windows machines it is not easy to navigate through the necessary tools to compile a package from source. 
 
+    "Fixes" to this problem is to set the code chunk option `error` to `TRUE` - this will not stop the evaluation, even if an error occurs
+
+    Alternatively, we can comment out pieces in the code that cause an error. 
 
 
 
@@ -48,4 +51,18 @@ class: inverse, middle
 It was not my intent to mislead you. 
 
 
+What does this command do?
 
+`weather%>%filter(grepl("AMES", weather$NAME))`
+
+
+---
+
+## Next Lab
+
+
+Well done! 
+
+The next lab is scheduled for Feb 20 (next week Wednesday)
+
+We will cover lists and functions in a spatial setting
