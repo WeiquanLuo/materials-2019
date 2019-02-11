@@ -115,9 +115,9 @@ highest standard: a copy of the external program in the right version is availab
 
 lower standard: document which versions of which programs were used
 
-`sessioninfo()` helps with figuring out versions in R
+`sessionInfo()` helps with figuring out versions in R
 
-Personally, I prefer `devtools::session_info()` - it is providing a data frame of the same info in a more readable form
+Personally, I prefer `devtools::session_info()` - it provides a data frame of the same info in a more readable form
 
 <br>
 <br>
@@ -150,7 +150,7 @@ Rule 6. **For Analyses That Include Randomness, Note Underlying Random Seeds**
 
 should be a no-brainer
 
-in R: `set.seed()` and `get.seed()`
+in R: `set.seed()` and `varComp::get.seed()`
 
 ---
 
