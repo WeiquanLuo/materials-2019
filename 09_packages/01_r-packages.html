@@ -132,11 +132,12 @@ LazyData: true
 - Flowchart for picking a [(type of) license](http://creativecommons.org.au/content/licensing-flowchart.pdf)
 
 - Most often used: GPL-2, GPL-3, MIT
-- GPL-2/3: "run, copy, distribute, study, change and improve the software" now and in the future, i.e. preserve open-source nature
 
-- GPL-3 clears up some inconsistencies and ambiguities in GPL-2 and should be used in new projects
+    - GPL-2/3: "run, copy, distribute, study, change and improve the software" now and in the future, i.e. preserve open-source nature
 
-- MIT releases software completely and also allows use in commercial projects, removes liability of provider.
+    - GPL-3 clears up some inconsistencies and ambiguities in GPL-2 and should be used in new projects
+
+    - MIT releases software completely and also allows use in commercial projects, removes liability of provider.
 
 ---
 
@@ -290,27 +291,23 @@ class: inverse
 
 ---
 
-## Data in a package
+## Getting it out there
 
-- Data frames must be stored in the `data` folder using the command `save`. 
+`pkgdown` supports making websites for your package (see e.g. [x3ptools](https://heike.github.io/x3ptools/), [ggplot2](https://ggplot2.tidyverse.org/), ... and soon yours)
 
-- Data documentation: http://r-pkgs.had.co.nz/data.html#documenting-data
+Process:
 
 ```
-#' Prices of 50,000 round cut diamonds.
-#'
-#' A dataset containing the prices and other attributes of almost 54,000
-#' diamonds.
-#'
-#' @format A data frame with 53940 rows and 10 variables:
-#' \describe{
-#'   \item{price}{price, in US dollars}
-#'   \item{carat}{weight of the diamond, in carats}
-#'   ...
-#' }
-#' @source \url{http://www.diamondse.info/}
-"diamonds"
+pkgdown::build_site()
 ```
+
+Assuming your package has a github repo (it really should!), add the `docs` folder to the repo 
+
+In `Settings` for your repo, switch GitHub Pages to the docs folder (see screenshot)
+
+---
+
+![](images/github-docs.png)
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({

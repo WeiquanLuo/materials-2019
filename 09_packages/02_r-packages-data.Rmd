@@ -1,0 +1,56 @@
+---
+title: "Stat 585 - R packages"
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+## Outline
+
+- file structures of packages
+
+- documentation
+
+- data in packages
+
+<br>
+<br>
+<br>
+
+Resource: [R packages](http://r-pkgs.had.co.nz/) by Hadley Wickham
+---
+
+## Data in a package
+
+- Data frames must be stored in the `data` folder using the command `save`. 
+
+- Data documentation: http://r-pkgs.had.co.nz/data.html#documenting-data
+
+```
+#' Prices of 50,000 round cut diamonds.
+#'
+#' A dataset containing the prices and other attributes of almost 54,000
+#' diamonds.
+#'
+#' @format A data frame with 53940 rows and 10 variables:
+#' \describe{
+#'   \item{price}{price, in US dollars}
+#'   \item{carat}{weight of the diamond, in carats}
+#'   ...
+#' }
+#' @source \url{http://www.diamondse.info/}
+"diamonds"
+```
+
+---
+
+## `usethis`
