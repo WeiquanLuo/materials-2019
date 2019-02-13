@@ -88,6 +88,17 @@ We would like to group similar countries
 
 ---
 
+## All countries - interactively
+
+```{r, fig.height = 6, fig.width = 8}
+gg <- gapminder %>% 
+ ggplot(aes(x = year, y =lifeExp)) + 
+  geom_line(aes(group = country, colour=continent)) 
+plotly::ggplotly(gg)
+```
+
+---
+
 ## Using models as exploratory tools
 
 Now we would like to repeat this modelling approach to all countries, i.e. 
@@ -310,13 +321,20 @@ Now we have all these models ...
 
 - for each value in the dataset: `broom::augment`
 
+--
+
 ```{r}
 library(broom)
 broom::glance(countryList$model[[1]])
+```
+
+---
+
+```{r}
 broom::tidy(countryList$model[[1]])
 ```
 
-## 
+---
 
 ```{r}
 broom::augment(countryList$model[[1]])
@@ -334,7 +352,6 @@ coefs = countryList$model %>% purrr::map(.f=broom::tidy)
 head(coefs)
 ```
 
----
 ---
 
 ##Extract values for each coefficient (cont'd)
