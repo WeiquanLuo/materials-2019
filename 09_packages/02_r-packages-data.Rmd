@@ -16,9 +16,7 @@ options(htmltools.dir.version = FALSE)
 
 ## Outline
 
-- file structures of packages
-
-- documentation
+- Another way of setting up a package
 
 - data in packages
 
@@ -26,7 +24,32 @@ options(htmltools.dir.version = FALSE)
 <br>
 <br>
 
-Resource: [R packages](http://r-pkgs.had.co.nz/) by Hadley Wickham
+Resource: [usethis](https://usethis.r-lib.org/) by Hadley Wickham and Jenny Bryan
+
+---
+class: inverse
+## Your Turn
+
+`usethis` is a package to help with organizing your workflow in packages and non-package projects
+
+Go through the [README](https://usethis.r-lib.org/) site of `usethis` and try the commands out to create a new package
+
+Use `usethis` functionality to set up a README.Rmd file and a NEWS.md file.
+
+---
+class: inverse
+## Your Turn
+
+The `usethis` package allows you to directly connect a project to git and github
+
+1. Check with `use_git_config()` that your user name and email are correct for qorking with github
+
+2. Use `edit_git_config` is they are not correct and fix the information in the file
+
+3. Then use `use_github()` - most likely this will result in an error, unless you have set up a token. Follow the instructions, restart R and try again. 
+
+4. Go to your github page and check whether the new repo is there ... 
+
 ---
 
 ## Data in a package
@@ -51,6 +74,4 @@ Resource: [R packages](http://r-pkgs.had.co.nz/) by Hadley Wickham
 "diamonds"
 ```
 
----
 
-## `usethis`

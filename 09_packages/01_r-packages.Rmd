@@ -70,7 +70,9 @@ class: inverse
 
 ## `devtools`
 
-Once you have a package, the `devtools` package provides functionality to support your development:
+Once you have a package, the `devtools` package provides functionality to support your development
+
+`devtools` functions operate on the active project (the folder of your project):
 
 - `document()` creates R help files from special comments in your code (talk about that in a bit)
 
