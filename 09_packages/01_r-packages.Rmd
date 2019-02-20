@@ -254,6 +254,9 @@ class: inverse
 | `@aliases` |	Make it easier for users to find |
 | `@rdname`	| Useful for functions that are invalid filenames and for combining docs |
 
+<!-- @import, @importFrom? -->
+<!-- Probably need to address import vs. depends at some point, if only to point them to a reference -->
+
 ---
 
 ## Commands in Roxygen
