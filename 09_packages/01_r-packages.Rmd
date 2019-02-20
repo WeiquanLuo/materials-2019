@@ -52,7 +52,7 @@ RStudio supports creating new packages. Follow the dialogs through `New Project 
 <img src="images/package-03.png" height=450>
 
 ---
-## 
+class:center,middle
 
 <img src="images/package-04.png" class = "cover">
 
