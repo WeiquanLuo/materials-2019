@@ -1,0 +1,55 @@
+you@yourcomputer:~/lab2$ tree
+.
+├── data
+│   ├── Beacons.dbf
+│   ├── Beacons.prj
+│   ├── Beacons.shp
+│   ├── Beacons.shx
+│   ├── Cities.dbf
+│   ├── Cities.prj
+│   ├── Cities.shp
+│   ├── Cities.shx
+│   ├── Coastline2.dbf
+│   ├── Coastline2.gmw
+│   ├── Coastline2.prj
+│   ├── Coastline2.shp
+│   ├── Coastline2.shx
+│   ├── Combined_Placenames_260312.dbf
+│   ├── Combined_Placenames_260312.prj
+│   ├── Combined_Placenames_260312.shp
+│   ├── Combined_Placenames_260312.shx
+│   ├── Combined_Placenames_260312.xyz
+│   ├── Contours_18.dbf
+│   ├── Contours_18.prj
+│   ├── Contours_18.shp
+│   ├── Contours_18.shx
+│   ├── Forests.dbf
+│   ├── Forests.prj
+│   ├── Forests.shp
+│   ├── Forests.shx
+│   ├── HelperContours.dbf
+│   ├── HelperContours.prj
+│   ├── HelperContours.shp
+│   ├── HelperContours.shx
+│   ├── LabelingProject.qgs
+│   ├── Lakes2.dbf
+│   ├── Lakes2.prj
+│   ├── Lakes2.shp
+│   ├── Lakes2.shx
+│   ├── PrimaryRoads.dbf
+│   ├── PrimaryRoads.prj
+│   ├── PrimaryRoads.shp
+│   ├── PrimaryRoads.shx
+│   ├── README.md
+│   ├── Rivers19.dbf
+│   ├── Rivers19.prj
+│   ├── Rivers19.shp
+│   ├── Rivers19.shx
+│   ├── Towns.dbf
+│   ├── Towns.prj
+│   ├── Towns.shp
+│   └── Towns.shx
+├── lab2.Rproj
+└── README.Rmd
+
+1 directory, 50 files
