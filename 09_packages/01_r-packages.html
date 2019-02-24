@@ -121,7 +121,29 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports: package1,package2
+Suggests: package3
+Depends: package4,package5
 ```
+
+---
+
+## Imports, Suggests, Depends
+
+[Description file reference](http://r-pkgs.had.co.nz/description.html)
+
+- Imports: packages in this list must be present for your package to work
+    - Imports are NOT attached when your package is loaded
+    - You must refer to functions in these packages using `package::function()` or import them using roxygen tags (`@import`, `@importFrom`)
+
+- Suggests: packages in this list may add functionality but are not necessary
+    - example data, unit tests, build vignettes
+
+- Depends: packages in this list are attached when your package is loaded    
+__Hint:__ don't use depends - use imports and `package::function()`    
+you will make it easier on your package's users
+
+[Namespaces reference](http://r-pkgs.had.co.nz/namespace.html#namespace) - why Depends is a bad idea
 
 ---
 
@@ -198,8 +220,22 @@ add &lt;- function(x, y) {
   x + y
 }
 ```
+---
 
-`@export` does not write anything into the help file - instead it writes a line into `NAMESPACE` and makes the function visible to package users.
+## Roxygen2 and NAMESPACE
+
+`@export`, `@import`, `@importFrom` do not write anything into the help file    
+instead, they write to `NAMESPACE`
+
+- `@export` makes the function visible to package users
+
+- `@import` makes the imported package visible to the function code so you don't have to use `package::function()` notation
+
+- `@importFrom` makes the imported function from the specified package visible (a more limited version of `@import`)
+
+--
+
+Note that Import in the DESCRIPTION file and `@import` for NAMESPACE aren't related - same word, two totally separate concepts
 
 ---
 
@@ -258,6 +294,8 @@ class: inverse
 | `@seealso` |	Pointers to related functions |
 | `@aliases` |	Make it easier for users to find |
 | `@rdname`	| Useful for functions that are invalid filenames and for combining docs |
+| `@import` | Call all functions from another package natively (without package::function) |
+| `@importFrom` | Call a single function from another package natively |
 
 ---
 
