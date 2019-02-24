@@ -126,22 +126,23 @@ Suggests: package3
 Depends: package4,package5
 ```
 
----
-
-## Imports, Suggests, Depends
-
 [Description file reference](http://r-pkgs.had.co.nz/description.html)
 
-- Imports: packages in this list must be present for your package to work
+---
+
+## Package dependencies: Imports, Suggests, Depends
+
+
+- **Imports:** packages in this list must be present for your package to work
     - Imports are NOT attached when your package is loaded
     - You must refer to functions in these packages using `package::function()` or import them using roxygen tags (`@import`, `@importFrom`)
 
-- Suggests: packages in this list may add functionality but are not necessary
-    - example data, unit tests, build vignettes
 
-- Depends: packages in this list are attached when your package is loaded    
-__Hint:__ don't use depends - use imports and `package::function()`    
-you will make it easier on your package's users
+- **Suggests:** packages in this list may add functionality but are not necessary
+    - e.g. for example data, unit tests, build vignettes
+
+- **Depends:** packages in this list are attached when your package is loaded    
+__Hint:__ It is better practice to use `Imports` rather than `Depends`. `Depends` might overwrite a previously loaded function of the same name (cause of some of the `plyr` - `dplyr` animosity)
 
 [Namespaces reference](http://r-pkgs.had.co.nz/namespace.html#namespace) - why Depends is a bad idea
 

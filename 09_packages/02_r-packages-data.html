@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stat 585 - R packages</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - R packages
+### Heike Hofmann
+
+---
+
+
+
+
+## Outline
+
+- Another way of setting up a package
+
+- data in packages
+
+- code examples in the help file
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+Resource: [usethis](https://usethis.r-lib.org/) by Hadley Wickham and Jenny Bryan
+
+---
+class: inverse
+## Your Turn
+
+`usethis` is a package to help with organizing your workflow in packages and non-package projects
+
+Go through the [README](https://usethis.r-lib.org/) site of `usethis` and try the commands out to create a new package
+
+Use `usethis` functionality to set up a README.Rmd file and a NEWS.md file.
+
+---
+class: inverse
+## Your Turn
+
+The `usethis` package allows you to directly connect a project to git and github
+
+1. Check with `use_git_config()` that your user name and email are correct for qorking with github
+
+2. Use `edit_git_config` is they are not correct and fix the information in the file
+
+3. Then use `use_github()` - most likely this will result in an error, unless you have set up a token. Follow the instructions, restart R and try again. 
+
+4. Go to your github page and check whether the new repo is there ... 
+
+---
+
+## Data in a package
+
+- Data frames must be stored in the `data` folder using the command `save`. 
+
+- Data documentation: http://r-pkgs.had.co.nz/data.html#documenting-data
+
+```
+#' Prices of 50,000 round cut diamonds.
+#'
+#' A dataset containing the prices and other attributes of almost 54,000
+#' diamonds.
+#'
+#' @format A data frame with 53940 rows and 10 variables:
+#' \describe{
+#'   \item{price}{price, in US dollars}
+#'   \item{carat}{weight of the diamond, in carats}
+#'   ...
+#' }
+#' @source \url{http://www.diamondse.info/}
+"diamonds"
+```
+
+---
+
+# Examples in packages
+
+- The Roxygen tag `@examples` allows you to write code as an example in the help file.
+
+- Always make use of this feature! It is not only good practice, it is also a first step in checking that your package is running properly
+
+- Your example has to be **stand alone**, i.e. if you are using some data, it needs to be included in the package.
+
+```
+#' @examples
+#' # you can include comments
+#' x &lt;- 1
+#' 5*x
+#' hello("this is a test")
+```
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
