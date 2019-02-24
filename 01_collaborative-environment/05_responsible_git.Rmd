@@ -84,6 +84,8 @@ class:middle,center
 
 - Other secure information (SSN, bank account number, location of secret treasure maps)
 
+- confidential data, or data your PI does not want to be published until after your thesis is submitted 
+
 .hard-right[![:scale 250px](https://upload.wikimedia.org/wikipedia/commons/a/a2/Standard-lock-key.jpg)]
 --
 
