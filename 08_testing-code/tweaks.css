@@ -11,3 +11,7 @@
   position-top:20px;
   position-right:20px;
 }
+
+.inverse {
+  text-shadow:0 0 0 #FFF !important;
+}
