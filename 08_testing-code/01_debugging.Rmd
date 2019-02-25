@@ -24,9 +24,10 @@ options(htmltools.dir.version = FALSE)
 
 ## Writing Code for Easy Debugging
 
-- Format your code well
+1. Format your code well
 
-- Leave comments 
+--
+2. Leave comments 
     - describe what the code is supposed to be doing
 
     - what the input is supposed to be
@@ -34,7 +35,8 @@ options(htmltools.dir.version = FALSE)
     - what the output should look like    
     ...For each functional unit of code
 
-- Check inputs and verify outputs
+--
+3. Check inputs and verify outputs
     - `stopifnot()` in base R
 
     - `assertthat` package (https://github.com/hadley/assertthat)
@@ -64,25 +66,19 @@ assert_that(is.character(1:10))
 
 ## Other `assertthat` functions
 
-- `is.flag(x)`: is `x` `TRUE` or `FALSE`? (a boolean flag)
-
-- `is.string(x)`: is `x` a length 1 character vector?
-
-- `has_name(x, nm)`, `x %has_name% nm`: does `x` have a component named `nm`?
-
-- `has_attr(x, attr)`, `x %has_attr% attr`: does `x` have attribute `attr`?
-
-- `is.count(x)`: is `x` a single positive integer?
-
-- `not_empty(x)`: are all dimensions of `x` greater than 0?
-
-- `noNA(x)`: is `x` free from missing values?
-
-- `is.dir(path)`: is `path` a directory?
-
-- `is.writeable(path)`/`is.readable(path)`: is `path` writeable/readable?
-
-- `has_extension(path, ext)`: does `file` have the specified extension `ext`?
+function | purpose
+-------- | -------
+`is.flag(x)` | is `x` `TRUE` or `FALSE`? (a boolean flag)
+`is.string(x)` | is `x` a length 1 character vector?
+`has_name(x, nm)` | does `x` have a component named `nm`?
+`has_attr(x, attr)` | does `x` have attribute `attr`?
+`is.count(x)` | is `x` a single positive integer?
+`not_empty(x)` | are all dimensions of `x` greater than 0?
+`noNA(x)` | is `x` free from missing values?
+`is.dir(path)` | is `path` a directory?
+`is.writeable(path)` | is `path` writeable?
+`is.readable(path)` | is `path` readable?
+`has_extension(path, ext)` | does `file` have the specified extension `ext`?
 
 ---
 class:inverse
@@ -100,6 +96,32 @@ col_means <- function(df) {
 ```
 
 Upload your code to https://gist.github.com/ and see if you can break your neighbor's `col_means()` function
+
+---
+
+## Your Turn - solution
+
+This is not an exhaustive list of checks...
+
+```{r}
+library(assertthat)
+
+col_means <- function(df) {
+  assert_that(is.data.frame(df)) # Check input is a data frame
+  numeric <- sapply(df, is.numeric)
+  assert_that(length(numeric) > 0) # >= one numeric column
+  numeric_cols <- df[, numeric]
+
+  list_res <- lapply(numeric_cols, mean)
+  res <- data.frame(list_res)
+  assert_that(
+    is.data.frame(res), # output is data frame
+    are_equal(ncol(res), length(numeric_cols)) # correct # cols
+  )
+  
+  res
+}
+```
 
 ---
 
@@ -121,7 +143,7 @@ Goals:
 
 ## `checkmate`
 
-- `assert*` to check type, length, any missing,  type-specific attributes (limits, character lengths, row/col names, ...)    
+- `assert*` : single statement to check type, length, type-specific attrs     
 also `assert_*` if you prefer that syntax
     - Throw an error if the check fails
     
@@ -158,3 +180,29 @@ col_means <- function(df) {
 Upload your code to https://gist.github.com/ and see if you can break your neighbor's `col_means()` function
 
 
+
+---
+
+## Your Turn - solution
+
+This is not an exhaustive list of checks...
+
+```{r}
+library(checkmate)
+
+col_means <- function(df) {
+  assert_data_frame(df) # Check input is a data frame
+  numeric <- sapply(df, is.numeric)
+  assert_atomic_vector(numeric, min.len = 1) # >= one numeric col
+  numeric_cols <- df[, numeric]
+
+  list_res <- lapply(numeric_cols, mean)
+  res <- data.frame(list_res)
+  assert_data_frame(
+    res, # output is data frame
+    ncols = length(numeric_cols) # correct # cols
+  ) 
+  
+  res
+}
+```
