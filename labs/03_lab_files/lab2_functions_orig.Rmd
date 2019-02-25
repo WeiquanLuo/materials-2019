@@ -1,0 +1,425 @@
+---
+title: "Map Drawing Functions"
+output: html_document
+---
+
+```{r dependencies}
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(sf)
+```
+
+```{r team-one}
+drawMap2 <- function(data){
+  # Flattens geometry column of data into a list of lists, each of which 
+  # contains a named matrix. Then it converts each of those matrices into 
+  # a dataframe and row binds them all together:
+  longLats <- bind_rows(map(flatten(flatten(data$geometry)),data.frame))
+  
+  # To add group number information, calculates the nrow for each matrix that 
+  # was bound into the longLats data frame. The result is a list of lists, each 
+  # of which containing a single number (the number of rows for a matrix), so 
+  # map_int grabs those numbers and puts them all into a vector:
+  groupSizes <- map_int(map(flatten(flatten(data$geometry)),nrow),1)
+  
+  # Creates a vector of the same nrows as longLats with group numbers for the 
+  # ith group. Repeats the group number depending on the ith value in 
+  # groupSizes:
+  groupNums <- rep(1:length(groupSizes),groupSizes)
+  
+  # Binds longLats and groupNums together and plots the map
+  data.frame(longLats,groupNums) %>%
+  mutate(order = row_number()) %>%
+  setNames(c("long","lat","group","order")) %>%
+  ggplot(aes(x=long,y=lat,group=group)) + 
+    geom_path() +
+    geom_path()
+}
+
+```
+
+
+```{r team-two}
+## Help calculate the group.
+## Input: oz$geometry
+helper.group <- function(geo){
+  geo %>% flatten() %>% flatten()-> dd
+  countgrouprep <- flatten_int(map(dd, nrow))
+  num_group <- length(countgrouprep)
+  rep(1:num_group, time = countgrouprep)
+}
+
+## Help calculate the order.
+## Input: oz$geometry[[i]]
+helper.order <- function(geol){
+  geol %>% flatten() -> d
+  longlat <- do.call(rbind, d)
+  order_num <- sum(flatten_int(map(d, nrow)))
+  order <- seq(1:order_num)
+  cbind(longlat, order)
+}
+
+## Converts shapefile to lat-long file
+## Input: oz$geometry
+sh2lat <- function(geofile){
+  res <- map(geofile, .f=helper.order)
+  ress <- do.call(rbind, res)
+  group <- helper.group(geofile)
+  ress <- cbind(ress, group)
+  colnames(ress) <- c("long", "lat", "order", "group")
+  ress <- as.data.frame(ress)
+}
+```
+
+```{r team-three}
+drawmap <- function(dat) 
+{
+  con_big <- read_sf(dat)
+  con_st <- maptools::thinnedSpatialPoly(
+    as(con_big, "Spatial"), tolerance = 0.1, 
+    minarea = 0.001, topologyPreserve = TRUE)
+  con <- st_as_sf(con_st)
+  con_plus <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., as.data.frame) %>% 
+    bind_rows() %>% 
+    rename(., c("x" ="long", "y" = "lat"))
+  temp <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., nrow) %>% 
+    unlist
+  con_plus$group <- rep(1 : length(temp), temp)
+
+  con_plus %>% 
+    ggplot(aes(x = long, y = lat, group = group)) + 
+    geom_polygon()
+}
+```
+
+```{r team-four}
+# apply to each state/row of geometry field in the sf dataset
+poly2df <- function(feature, unlist = T) {
+  if (unlist) feature <- unlist(feature, recursive = F)
+  lapply(feature, function(x) {
+    mutate(rename_all(data.frame(x), ~ c("long", "lat")), order = row_number())
+  }) %>% tibble(polygon = .)
+}
+
+# create new dataset reforming geometry to long, lat, order, group
+makedata <- function(data, thin = T, unlist = T) {
+  if (thin) {
+    oz_st <- maptools::thinnedSpatialPoly(as(data, "Spatial"), 
+                                          tol = 0.1, min = 0.001, topologyPreserve = T)
+    oz <- st_as_sf(oz_st)  # install package: rgeos
+  } else oz <- data
+  
+  as_tibble(oz) %>% 
+    mutate(new = map(geometry, poly2df, unlist = unlist)) %>% 
+    select(-geometry) %>%
+    unnest() %>% 
+    mutate(group = row_number()) %>% 
+    unnest()
+}
+
+```
+
+```{r team-five}
+ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(
+  as(ozbig, "Spatial"), tolerance = 0.1, 
+  minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+Mat2Df <- function(Mat){
+  long <- Mat[,1]
+  lat <- Mat[,2]
+  order <- 1:nrow(Mat)
+  group <- rep(rnorm(1),nrow(Mat))
+  df <- data.frame(long=long,lat=lat,group=group,order=order)
+  df
+}
+oz_flatten <- flatten(flatten(oz$geometry))
+ozplus <- purrr::map_df(.x=oz_flatten,.f=Mat2Df)
+ozplus %>% ggplot(aes(x=long, y=lat, group=group)) + 
+  geom_polygon()
+```
+
+
+```{r team-six}
+library("rgeos")
+ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(
+  as(ozbig, "Spatial"), tolerance = 0.1, 
+  minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+# helper function turning one of these matrices into a single data frame
+mat2df <- function(mat) {
+  df <- data.frame(long = mat[, 1],
+                   lat  = mat[, 2], 
+                   temporary.group = sum(mat[,1]+mat[,2] *nrow(mat) + rnorm(1, 100, 10)), 
+                   order= 1:nrow(mat))
+  df
+}
+
+# Create a dataframe ozplus from the geometry variable using purrr
+# map_df applies a function to elements of a list and bind the dataframes together
+# Instead of temporary.group variable by the function mat2df, 
+# group variable consisting of the index corresponding each matrix will be used.
+ozplus <- oz.geometry.flattened %>% purrr::map_df(.x = ., .id ="group", .f = mat2df)
+
+```
+
+```{r team-seven}
+ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(
+  as(ozbig, "Spatial"), tolerance = 0.1, 
+  minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+f <- function(dframe){
+  dframe <- data.frame(order = c(1:nrow(dframe)), long = dframe$x, lat = dframe$y)
+}
+## Here our depth is 3, but that could change depending on the file
+ozplus <- oz$geometry %>% 
+  modify_depth(3,data.frame) %>% 
+  modify_depth(3,f) %>%
+  flatten() %>%
+  flatten() %>%
+  bind_rows(.id = "group")
+
+ozplus %>% 
+  ggplot(aes(x = long, y = lat, group = group)) + 
+  geom_polygon(fill = "white", colour = "black", lwd = 1)+
+  theme_bw()+
+  coord_quickmap()
+```
+
+```{r team-eight}
+oz_st <- maptools::thinnedSpatialPoly(
+  as(kaz, "Spatial"), tolerance = 0.1, 
+  minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+#Check for the list
+is.list(oz$geometry)
+
+geometry <- oz$geometry
+
+# Helper fucntion to turn one of these matrices into a single data frame with variables long, lat, group, order. 
+helper <- function(y) {
+  data <- data.frame(long = y[, 1],
+                     lat  = y[, 2], 
+                     groups = rep(rnorm(1),nrow(y)),
+                     order = 1:nrow(y))
+  data
+}
+# In order to receive list of matrices, we used the flatten 
+matrix <- geometry %>% flatten() %>% flatten()
+
+# By using  purrr functionality, we create the dataframe
+ozplus <- matrix %>% purrr::map_df(.x = ., .id ="group", .f = helper)
+
+```
+
+```{r team-nine}
+
+### i, j, k represent the index of the geometry[[i]][[j]][[k]])
+### work on k
+reorganise_k <- function(x) {
+  force(x)
+  y <- data.frame(x, group = group, order = 1:nrow(x), i = i, j = j, k = k)
+  group <<- group + 1
+  k <<- k + 1
+  return(y)
+}
+
+### work on j
+reorganise_j <- function(x) {
+  force(x)
+  k <<- 1
+  y <- lapply(x, FUN = reorganise_k)
+  j <<- j + 1
+  return(y)
+}
+
+### work on i
+reorganise_i <- function(x) {
+  force(x)
+  j <<- 1
+  y <- lapply(x, FUN = reorganise_j)
+  i <<- i + 1
+  return(y)
+}
+
+# set initial value
+group <- 1
+i <- 1
+j <- 1
+k <- 1
+
+# run
+geometry_my1 <- lapply(oz$geometry, reorganise_i)
+
+# make it a dataframe
+
+reducetodata <- function(x) {
+  lapply(x, Reduce, f = rbind)
+}
+
+temp1 <- lapply(geometry_my1, reducetodata)
+temp2 <- lapply(temp1, Reduce, f = rbind)
+geometry_final <- Reduce(rbind, temp2)
+rm(temp1, temp2, geometry_my1)
+
+# str(geometry_final)
+
+ozplus <- geometry_final
+rm(geometry_final)
+names(ozplus) <- c("long", "lat", "group", "order", "i", "j", "k")
+
+head(ozplus)
+```
+
+```{r team-ten}
+
+shpBigToSmall <- function(dsn) {
+  
+  package_required <- c("sf","purrr","tidyverse")
+  for (packages_name in package_required) {
+    if(!is.element(packages_name, installed.packages()[])){
+      install.packages(packages_name)
+    }
+    else {print(paste(packages_name,"library already installed"))}
+  }
+  sapply(package_required, require, character.only=TRUE)
+  
+  shpbig <- read_sf(dsn)
+  shp_st <- maptools::thinnedSpatialPoly(
+    as(shpbig, "Spatial"), tolerance = 0.1, 
+    minarea = 0.001, topologyPreserve = TRUE)
+  shp <- st_as_sf(shp_st)
+  
+  shpSmall <- shp %>% select(NAME_1, geometry) %>% 
+    group_by() %>% 
+    mutate(coord = geometry %>% map(.f = function(m) flatten(.x=m)),
+           region = row_number()) %>% 
+    unnest
+  st_geometry(shpSmall) <- NULL
+  shpSmall <- shpSmall %>% mutate(coord = coord %>% map(.f = function(m) as_tibble(m)),
+                                group = row_number()) %>% 
+    unnest %>% 
+    setNames(c("name", "region","group", "long", "lat"))
+
+  return(shpSmall) 
+}
+```
+
+```{r team-eleven}
+# This function extracts data from a shapefile with 1 level in spf$geometry
+extract_data_L1 <- function(spf) {
+# Reads in the shapefile and extracts data from nested lists, finally
+# recording them into one data frame with columns: long, lat, group and
+# order.
+#
+# Args:
+#   spf:    shapefile of a country
+#
+# Output:
+#   df:     data frame
+    
+    # all matrices will be concatenated to this df
+    df <- data.frame(t(1:3))
+    colnames(df) <- c("long", "lat", "group")
+    
+    # start group enumeration
+    count = 1
+    
+    # use loops to read nested lists
+    for (f in 1:length(spf$geometry)) {
+        for (i in 1:length(spf$geometry[[f]])) {
+            temp <- map_depth(spf$geometry[[f]][[i]], 1, .f = c(1))
+            temp <- data.frame(matrix(unlist(temp), ncol = 2, byrow
+                                      = FALSE))
+            colnames(temp) <- c("long", "lat")
+            temp$group <- rep(count, times = nrow(temp))
+            df <- rbind(df, temp)
+            count <- count + 1
+        }
+    }
+    
+    # remove first row
+    df <- df[-1,]
+    
+    # add order variable
+    df$order <- as.integer(1:nrow(df))
+    return(df)
+}
+
+# This function extracts data from a shapefile with 2 levels in spf$geometry
+extract_data_L2 <- function(spf) {
+# Reads in the shapefile and extracts data from nested lists, finally
+# recording them into one data frame with columns: long, lat, group and
+# order.
+#
+# Args:
+#   spf:    shapefile of a country
+#
+# Output:
+#   df:     data frame
+    
+    # pull each first element from nested lists
+    # remove hierarchy by flatten
+    # map list with sublists to data.frame function
+    # add new variable = "group"
+    map_depth(.x = spf$geometry, 2, .f = c(1)) %>% flatten %>% 
+        map_dfr(data.frame, .id = "group") -> df 
+    
+    # rename columns
+    colnames(df) <- c("group", "long", "lat")
+    
+    # add new variable = "order"
+    df$order <- seq(from = 1, to = nrow(df), by = 1)
+    
+    return(df)
+}
+
+
+ozplus <- extract_data_L2(oz)
+
+```
+
+
+```{r team-twelve}
+helper <- function(d){
+  d <- unlist(d,recursive = FALSE)
+  d <- purrr::map(d,.f=add_order)
+  d <- add_layer(d)
+  return(d)
+}
+
+
+add_order <- function(d){
+  l <- nrow(d)
+  return(cbind(d,seq(1,l,by=1)))
+}
+add_layer <- function(d){
+  ll <- unlist(lapply(d,nrow))
+  d <- do.call(rbind,d)
+  d <- cbind(d,rep(c(1:length(ll)),time=ll))
+  return(d)
+}
+
+library(plyr)
+library(ggplot2)
+purrr::map(oz$geometry, .f=helper) -> res
+
+res <- add_layer(res)
+colnames(res) <- c('long','lat','order','group','geo')
+res <- as.data.frame(res)
+
+```

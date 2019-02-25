@@ -1,0 +1,391 @@
+---
+title: "Map Drawing Functions - Fixed"
+output: html_document
+---
+
+```{r dependencies}
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(sf)
+```
+
+```{r team-one}
+sf_to_df1 <- function(data) {
+  # Flattens geometry column of data into a list of lists, each of which
+  # contains a named matrix. Then it converts each of those matrices into
+  # a dataframe and row binds them all together:
+  longLats <- data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    map(data.frame) %>%
+    bind_rows()
+
+  # To add group number information, calculates the nrow for each matrix that
+  # was bound into the longLats data frame. The result is a list of lists, each
+  # of which containing a single number (the number of rows for a matrix), so
+  # map_int grabs those numbers and puts them all into a vector:
+  groupSizes <- data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    map(nrow) %>%
+    map_int(1)
+
+  # Creates a vector of the same nrows as longLats with group numbers for the
+  # ith group. Repeats the group number depending on the ith value in
+  # groupSizes:
+  groupNums <- rep(1:length(groupSizes), groupSizes)
+
+  # Binds longLats and groupNums together
+  data.frame(longLats, groupNums) %>%
+    mutate(order = row_number()) %>%
+    setNames(c("long", "lat", "group", "order"))
+}
+```
+
+
+```{r team-two}
+## Help calculate the group.
+## Input: oz$geometry
+helper2_group <- function(geo) {
+  dd <- geo %>% flatten() %>% flatten()
+  countgrouprep <- dd %>% map(nrow) %>% flatten_int()
+  num_group <- length(countgrouprep)
+  rep(1:num_group, time = countgrouprep)
+}
+
+## Help calculate the order.
+## Input: oz$geometry[[i]]
+helper2_order <- function(geol) {
+  d <- geol %>% flatten()
+  longlat <- do.call(rbind, d)
+  order_num <- d %>%
+    map(nrow) %>%
+    flatten_int() %>%
+    sum()
+  order <- seq(1:order_num)
+  cbind(longlat, order)
+}
+
+## Converts shapefile to lat-long file
+## Input: oz$geometry
+sf_to_df2 <- function(geofile) {
+  res <- map(geofile, .f = helper2_order)
+  ress <- do.call(rbind, res)
+  group <- helper2_group(geofile)
+  ress <- cbind(ress, group)
+  colnames(ress) <- c("long", "lat", "order", "group")
+  ress <- as.data.frame(ress)
+}
+```
+
+```{r team-three}
+sf_to_df3 <- function(data) {
+  data_plus <- data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    lapply(., as.data.frame) %>%
+    bind_rows() %>%
+    rename(., c("x" = "long", "y" = "lat"))
+  temp <- data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    lapply(., nrow) %>%
+    unlist()
+  data_plus$group <- rep(1:length(temp), temp)
+
+  data_plus
+}
+```
+
+```{r team-four}
+# apply to each state/row of geometry field in the sf dataset
+helper4_poly2df <- function(feature, unlist = T) {
+  if (unlist) feature <- unlist(feature, recursive = F)
+  lapply(feature, function(x) {
+    data.frame(x) %>%
+      rename_all(~ c("long", "lat")) %>%
+      mutate(order = row_number())
+  }) %>%
+    tibble(polygon = .)
+}
+
+# create new dataset reforming geometry to long, lat, order, group
+sf_to_df4 <- function(data, unlist = T) {
+  as_tibble(data) %>%
+    mutate(new = map(geometry, helper4_poly2df, unlist = unlist)) %>%
+    select(-geometry) %>%
+    unnest() %>%
+    mutate(group = row_number()) %>%
+    unnest()
+}
+```
+
+```{r team-five}
+
+helper5_Mat2Df <- function(Mat) {
+  long <- Mat[, 1]
+  lat <- Mat[, 2]
+  order <- 1:nrow(Mat)
+  group <- rep(rnorm(1), nrow(Mat))
+  df <- data.frame(long = long, lat = lat, group = group, order = order)
+  df
+}
+
+sf_to_df5 <- function(data) {
+  data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    purrr::map_df(helper5_Mat2Df)
+}
+```
+
+
+```{r team-six}
+# helper function turning one of these matrices into a single data frame
+helper6_mat2df <- function(mat) {
+  df <- data.frame(
+    long = mat[, 1],
+    lat = mat[, 2],
+    temporary.group = sum(mat[, 1] + mat[, 2] * nrow(mat) + rnorm(1, 100, 10)),
+    order = 1:nrow(mat)
+  )
+  df
+}
+
+# Create a dataframe from the geometry variable using purrr
+# map_df applies a function to elements of a list and bind the dataframes together
+# Instead of temporary.group variable by the function mat2df,
+# group variable consisting of the index corresponding each matrix will be used.
+sf_to_df6 <- function(data) {
+  data$geometry %>%
+    flatten() %>%
+    flatten() %>%
+    purrr::map_df(.x = ., .id = "group", .f = helper6_mat2df)
+}
+```
+
+```{r team-seven}
+
+helper7_df <- function(dframe) {
+  dframe <- data.frame(order = c(1:nrow(dframe)), long = dframe$x, lat = dframe$y)
+}
+
+sf_to_df7 <- function(data) {
+  ## Here our depth is 3, but that could change depending on the file
+  data$geometry %>%
+    modify_depth(3, data.frame) %>%
+    modify_depth(3, helper7_df) %>%
+    flatten() %>%
+    flatten() %>%
+    bind_rows(.id = "group")
+}
+```
+
+```{r team-eight}
+
+# Helper fucntion to turn one of these matrices into a single data frame with variables long, lat, group, order.
+helper8 <- function(y) {
+  data <- data.frame(
+    long = y[, 1],
+    lat = y[, 2],
+    groups = rep(rnorm(1), nrow(y)),
+    order = 1:nrow(y)
+  )
+  data
+}
+
+sf_to_df8 <- function(data) {
+  data$geometry %>%
+    # In order to receive list of matrices, we used the flatten
+    flatten() %>%
+    flatten() %>%
+    # By using  purrr functionality, we create the dataframe
+    purrr::map_df(.x = ., .id = "group", .f = helper8)
+}
+```
+
+```{r team-nine}
+
+### i, j, k represent the index of the geometry[[i]][[j]][[k]])
+### work on k
+helper9_reorganise_k <- function(x) {
+  force(x)
+  y <- data.frame(x, group = group, order = 1:nrow(x), i = i, j = j, k = k)
+  group <<- group + 1
+  k <<- k + 1
+  return(y)
+}
+
+### work on j
+helper9_reorganise_j <- function(x) {
+  force(x)
+  k <<- 1
+  y <- lapply(x, FUN = helper9_reorganise_k)
+  j <<- j + 1
+  return(y)
+}
+
+### work on i
+helper9_reorganise_i <- function(x) {
+  force(x)
+  j <<- 1
+  y <- lapply(x, FUN = helper9_reorganise_j)
+  i <<- i + 1
+  return(y)
+}
+
+# make it a dataframe
+helper9_reducetodata <- function(x) {
+  lapply(x, Reduce, f = rbind)
+}
+
+sf_to_df9 <- function(data) {
+  
+  # set initial value
+  group <- 1
+  i <- 1
+  j <- 1
+  k <- 1
+  
+  # run
+  geometry_my1 <- lapply(data$geometry, reorganise_i)
+
+  temp1 <- lapply(geometry_my1, helper9_reducetodata)
+  temp2 <- lapply(temp1, Reduce, f = rbind)
+  geometry_final <- Reduce(rbind, temp2)
+  
+  geometry_final
+}
+```
+
+```{r team-ten}
+sf_to_df10 <- function(data) {
+  shpSmall <- data$geometry %>%
+    group_by() %>%
+    mutate(
+      coord = geometry %>% map(.f = function(m) flatten(.x = m)),
+      region = row_number()
+    ) %>%
+    unnest()
+  st_geometry(shpSmall) <- NULL
+  shpSmall <- shpSmall %>%
+    mutate(
+      coord = coord %>% map(.f = function(m) as_tibble(m)),
+      group = row_number()
+    ) %>%
+    unnest() %>%
+    setNames(c("name", "region", "group", "long", "lat"))
+
+  return(shpSmall)
+}
+```
+
+```{r team-eleven}
+# This function extracts data from a shapefile with 1 level in data$geometry
+sf_to_df11_level1 <- function(data) {
+  # Reads in the shapefile and extracts data from nested lists, finally
+  # recording them into one data frame with columns: long, lat, group and
+  # order.
+  #
+  # Args:
+  #   spf:    shapefile of a country
+  #
+  # Output:
+  #   df:     data frame
+
+  # all matrices will be concatenated to this df
+  df <- data.frame(t(1:3))
+  colnames(df) <- c("long", "lat", "group")
+
+  # start group enumeration
+  count <- 1
+
+  # use loops to read nested lists
+  for (f in 1:length(data$geometry)) {
+    for (i in 1:length(data$geometry[[f]])) {
+      temp <- map_depth(data$geometry[[f]][[i]], 1, .f = c(1))
+      temp <- data.frame(matrix(unlist(temp),
+        ncol = 2, byrow
+        = FALSE
+      ))
+      colnames(temp) <- c("long", "lat")
+      temp$group <- rep(count, times = nrow(temp))
+      df <- rbind(df, temp)
+      count <- count + 1
+    }
+  }
+
+  # remove first row
+  df <- df[-1, ]
+
+  # add order variable
+  df$order <- as.integer(1:nrow(df))
+  return(df)
+}
+
+# This function extracts data from a shapefile with 2 levels in data$geometry
+sf_to_df11_level2 <- function(data) {
+  # Reads in the shapefile and extracts data from nested lists, finally
+  # recording them into one data frame with columns: long, lat, group and
+  # order.
+  #
+  # Args:
+  #   spf:    shapefile of a country
+  #
+  # Output:
+  #   df:     data frame
+
+  # pull each first element from nested lists
+  # remove hierarchy by flatten
+  # map list with sublists to data.frame function
+  # add new variable = "group"
+  map_depth(.x = data$geometry, 2, .f = c(1)) %>%
+    flatten() %>%
+    map_dfr(data.frame, .id = "group") -> df
+
+  # rename columns
+  colnames(df) <- c("group", "long", "lat")
+
+  # add new variable = "order"
+  df$order <- seq(from = 1, to = nrow(df), by = 1)
+
+  return(df)
+}
+
+```
+
+
+```{r team-twelve}
+helper12 <- function(d) {
+  d <- unlist(d, recursive = FALSE)
+  d <- purrr::map(d, .f = helper12_add_order)
+  d <- helper12_add_layer(d)
+  return(d)
+}
+
+helper12_add_order <- function(d) {
+  l <- nrow(d)
+  return(cbind(d, seq(1, l, by = 1)))
+}
+
+helper12_add_layer <- function(d) {
+  ll <- unlist(lapply(d, nrow))
+  d <- do.call(rbind, d)
+  d <- cbind(d, rep(c(1:length(ll)), time = ll))
+  return(d)
+}
+
+library(plyr)
+library(ggplot2)
+sf_to_df12 <- function(data) {
+  res <- data$geometry %>%
+    purrr::map(helper12)
+  res <- helper12_add_layer(res)
+  colnames(res) <- c("long", "lat", "order", "group", "geo")
+  res <- as.data.frame(res)
+  
+  res
+}
+```
