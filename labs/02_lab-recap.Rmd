@@ -1,0 +1,341 @@
+---
+title: 'Lab Assignment #2: Exploring the world'
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE, echo = TRUE)
+```
+# How did your exploration go?
+
+- file paths !!!
+
+- debugging ...
+
+---
+
+# RStudio projects
+
+- Keeping track of file paths is one of the reasons we use projects in RStudio
+
+- every R session has a **working directory** 
+
+- check and set working directories with `getwd()` and `setwd()`
+
+- Opening an R project automatically sets the working directory to the folder of the project
+
+---
+
+# Local and global file paths
+
+- global or absolute file paths consist of the path from the root of the machine "/" to a file or folder:
+
+    - `"/Users/heike/Documents/Teaching/stat 585/Spring 2019/materials-2019/09_packages/01_r-packages.html"`
+
+    - `"C://Users/hofmann/..."`
+
+- local or relative file paths start from 'here' `.` and describe how to get to 'there'
+
+    - `"./data/structures.csv"`
+
+    - `"data/structures.csv"`
+    
+- Windows machines use `\\` for `/`, but understand correctly when you use `/`    
+
+--
+
+**Don't use global file paths in any of your scripts - your collaborators will not have the same folder structure, and your future self might move a folder**
+
+---
+class: inverse
+# Your Turn
+
+
+1.  Use `file.choose()` to pick a data file of your choice on your machine. `file.choose` returns an **absolute file path**.
+
+2. Use this absolute path to read the data file. 
+
+3. Check your current working directory with `setwd()`. This also returns an absolute path.
+
+4. Compare the paths for the working directory and the data file to work out the relative file path. 
+
+5. Use the relative file path to read the data file and make sure that you get the same result. 
+
+---
+
+# More on file paths
+
+- file paths are case sensitive, i.e. `Data` is not equal to `data`
+
+- the devil is in the details: `ME-GIS-master` is not the same as `ME-GIS`
+
+---
+
+# The package `sf`
+
+The `sf` package is a new(ish) development that is likely going to replace packages `sp` and `maptools` for working with spatial data (https://r-spatial.github.io/sf/articles/sf1.html).
+
+1. Install the `sf` package from CRAN. You might have to install additional dependencies.
+
+2. A lot of government agencies use shapefiles to publish spatial information, such as states, counties, congressional districts, exact locations of state and national parks, etc. 
+
+<!--You might to also have to install `rgdal` (R package) and the gdal framework (https://www.gdal.org/).-->
+
+---
+
+# Structure for lab 2
+
+This is how your repo might be structured:
+
+```
+├── lab2
+│   ├── data
+│   │   ├── ME-GIS
+│   │   │   ├── Beacons.dbf
+│   │   │   ├── Beacons.prj
+⋮      ⋮     ⋮
+│   │   │   └── Towns.shx
+│   │   ├── gadm36_AUS_shp
+│   │   └── gadm36_<your country>_shp
+│   ├── README.Rmd
+└── └── lab.Rproj
+```
+
+---
+
+# Middle Earth with annotations
+
+```{r}
+library(ggplot2)
+library(sf)
+
+p <- ggplot() +
+  geom_sf(data = read_sf("data/ME-GIS/Coastline2.shp"), 
+          colour="grey10", fill="grey90") +
+  geom_sf(data = read_sf("data/ME-GIS/Rivers19.shp"), 
+          colour="steelblue", size=0.3) +
+  geom_sf(data = read_sf("data/ME-GIS/PrimaryRoads.shp"), 
+          size = 0.7, colour="grey30") +
+  geom_sf(data = read_sf("data/ME-GIS/Cities.shp")) +
+  theme_bw() 
+
+```
+---
+
+# Adding map elements
+
+```{r}
+library(ggspatial)
+
+cities <- read_sf("data/ME-GIS/Cities.shp")
+p2 <- p + 
+  geom_sf_text(data = cities, aes(label=Name), vjust=-.5, size = 3) +
+  annotation_scale() +
+  annotation_north_arrow()
+```
+
+---
+
+# plotting the map
+
+```{r}
+p2
+```
+---
+
+# Australia shapefile
+
+For a concrete example, we will load in the data from the  shapefile for Australia
+
+```{r}
+
+ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+oz
+```
+
+---
+
+# Code magic
+
+```
+oz_st <- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), 
+  tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+```
+
+Get into the habit of reading code. What does this code do? What do the parameters do?
+
+
+---
+
+# Germany
+
+```{r}
+debig <- read_sf("data/gadm36_DEU_shp/gadm36_DEU_1.shp")
+
+de_st <- maptools::thinnedSpatialPoly(as(debig, "Spatial"), 
+  tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+de <- st_as_sf(de_st)
+
+ggplot() + geom_sf(data=de, fill="grey30")
+```
+
+---
+
+Some shapefiles, particulrly for smaller countries, need an adjustment to the parameter settings:
+
+```{r}
+de_st2 <- maptools::thinnedSpatialPoly(as(debig, "Spatial"), 
+  tolerance = 0.025, minarea = 0.001, topologyPreserve = TRUE)
+de2 <- st_as_sf(de_st2)
+ggplot() + geom_sf(data=de2, fill="grey30")
+
+```
+
+
+
+---
+
+# Approach with purrr
+
+The main idea is to write a function that works on the inner-most element (the matrix), and converts that object into a data frame.
+
+We then apply this function on every element using purrr 
+and then  unnest twice.
+
+
+**This is just one solution - you had a lot of other solutions that are working great!**
+---
+
+# Matrix to Data frame
+
+```{r}
+extract <- function(x) {
+  # x is a list with a single element
+  dm <- x[[1]]
+  
+  dframe <- as.data.frame(dm)
+  names(dframe) <- c("long", "lat")
+  dframe$order = 1:nrow(dframe)
+  dframe
+}
+
+str(extract(oz$geometry[[1]][[1]]))
+```
+---
+
+# Piecing things together
+
+```{r, message = FALSE}
+library(tidyverse)
+library(purrr)
+library(tidyr)
+
+ozplus <- oz %>% mutate(
+  data = geometry %>% purrr::map(.f = function(list) {
+    inner = list %>% purrr::map(.f = extract)
+    
+    data.frame(subgroup = 1:length(inner), inner = I(inner))
+  })
+)
+
+ozplus$group <- 1:nrow(ozplus)
+ozplus <- ozplus %>% unnest(data) 
+ozplus <- ozplus %>% unnest(inner)
+
+# make group unique for each part of a multipolygon
+
+ozplus$group <- paste(ozplus$group, ozplus$subgroup, sep="-")
+```
+
+---
+
+# Now plot
+
+```{r}
+ozplus %>% ggplot(aes(x = long, y = lat, group = group)) + geom_polygon()
+```
+
+
+---
+
+# Make the code into a function
+
+```{r}
+to_dframe <- function(shapes) {
+  # assume shapes have geometry
+
+  shapesplus <- shapes %>% mutate(
+    data = geometry %>% purrr::map(.f = function(list) {
+      inner = list %>% purrr::map(.f = extract)
+      
+      data.frame(subgroup = 1:length(inner), inner = I(inner))
+    }) 
+  ) %>% select(-geometry)
+  
+  shapesplus$group <- 1:nrow(shapesplus)
+  shapesplus <- shapesplus %>% unnest(data) 
+  shapesplus <- shapesplus %>% unnest(inner)
+  
+  # make group unique for each part of a multipolygon
+  
+  shapesplus$group <- paste(shapesplus$group, shapesplus$subgroup, sep="-")  
+  
+  shapesplus 
+}
+```
+
+---
+
+# Testing your code
+
+```{r}
+to_dframe(oz)
+```
+
+---
+
+# The world according to Stat 585
+
+```{r}
+countries <- dir("data", pattern="shp", recursive = TRUE, full.names = TRUE)
+
+# remove all the files from Middle Earth
+countries <- countries[-grep("ME-GIS", countries)]
+
+# only use the outline of each country - that's level 0
+countries <- grep("_0.shp", countries, value = TRUE)
+
+## now we use purrr to create a list of layers
+layers <- purrr::map(countries, function(x) {
+  sfbig <- read_sf(x)
+  stsmall <- maptools::thinnedSpatialPoly(as(sfbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+  sfdata <- st_as_sf(stsmall)
+
+  geom_sf(data = sfdata, aes(fill=NAME_0))
+})
+```
+
+---
+
+```{r, fig.width = 8, fig.height = 5}
+ggplot() + layers 
+```
+
+---
+
+# Approaches you took
+
+
+- neat functions we all should know about:
+`flatten()`, 
+`modify_depth()`

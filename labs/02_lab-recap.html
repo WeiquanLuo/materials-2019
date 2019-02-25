@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lab Assignment #2: Exploring the world</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lab Assignment #2: Exploring the world
+### Heike Hofmann
+
+---
+
+
+# How did your exploration go?
+
+- file paths !!!
+
+- debugging ...
+
+---
+
+# RStudio projects
+
+- Keeping track of file paths is one of the reasons we use projects in RStudio
+
+- every R session has a **working directory** 
+
+- check and set working directories with `getwd()` and `setwd()`
+
+- Opening an R project automatically sets the working directory to the folder of the project
+
+---
+
+# Local and global file paths
+
+- global or absolute file paths consist of the path from the root of the machine "/" to a file or folder:
+
+    - `"/Users/heike/Documents/Teaching/stat 585/Spring 2019/materials-2019/09_packages/01_r-packages.html"`
+
+    - `"C://Users/hofmann/..."`
+
+- local or relative file paths start from 'here' `.` and describe how to get to 'there'
+
+    - `"./data/structures.csv"`
+
+    - `"data/structures.csv"`
+    
+- Windows machines use `\\` for `/`, but understand correctly when you use `/`    
+
+--
+
+**Don't use global file paths in any of your scripts - your collaborators will not have the same folder structure, and your future self might move a folder**
+
+---
+class: inverse
+# Your Turn
+
+
+1.  Use `file.choose()` to pick a data file of your choice on your machine. `file.choose` returns an **absolute file path**.
+
+2. Use this absolute path to read the data file. 
+
+3. Check your current working directory with `setwd()`. This also returns an absolute path.
+
+4. Compare the paths for the working directory and the data file to work out the relative file path. 
+
+5. Use the relative file path to read the data file and make sure that you get the same result. 
+
+---
+
+# More on file paths
+
+- file paths are case sensitive, i.e. `Data` is not equal to `data`
+
+- the devil is in the details: `ME-GIS-master` is not the same as `ME-GIS`
+
+---
+
+# The package `sf`
+
+The `sf` package is a new(ish) development that is likely going to replace packages `sp` and `maptools` for working with spatial data (https://r-spatial.github.io/sf/articles/sf1.html).
+
+1. Install the `sf` package from CRAN. You might have to install additional dependencies.
+
+2. A lot of government agencies use shapefiles to publish spatial information, such as states, counties, congressional districts, exact locations of state and national parks, etc. 
+
+&lt;!--You might to also have to install `rgdal` (R package) and the gdal framework (https://www.gdal.org/).--&gt;
+
+---
+
+# Structure for lab 2
+
+This is how your repo might be structured:
+
+```
+├── lab2
+│   ├── data
+│   │   ├── ME-GIS
+│   │   │   ├── Beacons.dbf
+│   │   │   ├── Beacons.prj
+⋮      ⋮     ⋮
+│   │   │   └── Towns.shx
+│   │   ├── gadm36_AUS_shp
+│   │   └── gadm36_&lt;your country&gt;_shp
+│   ├── README.Rmd
+└── └── lab.Rproj
+```
+
+---
+
+# Middle Earth with annotations
+
+
+```r
+library(ggplot2)
+library(sf)
+```
+
+```
+## Linking to GEOS 3.6.1, GDAL 2.1.3, PROJ 4.9.3
+```
+
+```r
+p &lt;- ggplot() +
+  geom_sf(data = read_sf("data/ME-GIS/Coastline2.shp"), 
+          colour="grey10", fill="grey90") +
+  geom_sf(data = read_sf("data/ME-GIS/Rivers19.shp"), 
+          colour="steelblue", size=0.3) +
+  geom_sf(data = read_sf("data/ME-GIS/PrimaryRoads.shp"), 
+          size = 0.7, colour="grey30") +
+  geom_sf(data = read_sf("data/ME-GIS/Cities.shp")) +
+  theme_bw() 
+```
+---
+
+# Adding map elements
+
+
+```r
+library(ggspatial)
+
+cities &lt;- read_sf("data/ME-GIS/Cities.shp")
+p2 &lt;- p + 
+  geom_sf_text(data = cities, aes(label=Name), vjust=-.5, size = 3) +
+  annotation_scale() +
+  annotation_north_arrow()
+```
+
+---
+
+# plotting the map
+
+
+```r
+p2
+```
+
+```
+## Warning: Removed 4 rows containing missing values (geom_text).
+```
+
+![](02_lab-recap_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+---
+
+# Australia shapefile
+
+For a concrete example, we will load in the data from the  shapefile for Australia
+
+
+```r
+ozbig &lt;- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st &lt;- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz &lt;- st_as_sf(oz_st)
+
+oz
+```
+
+```
+## Simple feature collection with 11 features and 10 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 112.9225 ymin: -55.11694 xmax: 159.1086 ymax: -9.142306
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##    GID_0    NAME_0    GID_1                       NAME_1 VARNAME_1
+## 1    AUS Australia  AUS.1_1  Ashmore and Cartier Islands      &lt;NA&gt;
+## 2    AUS Australia  AUS.2_1 Australian Capital Territory      &lt;NA&gt;
+## 3    AUS Australia  AUS.3_1  Coral Sea Islands Territory      &lt;NA&gt;
+## 4    AUS Australia  AUS.4_1         Jervis Bay Territory      &lt;NA&gt;
+## 5    AUS Australia  AUS.5_1              New South Wales      &lt;NA&gt;
+## 6    AUS Australia  AUS.6_1           Northern Territory      &lt;NA&gt;
+## 7    AUS Australia  AUS.7_1                   Queensland      &lt;NA&gt;
+## 8    AUS Australia  AUS.8_1              South Australia      &lt;NA&gt;
+## 9    AUS Australia  AUS.9_1                     Tasmania      &lt;NA&gt;
+## 10   AUS Australia AUS.10_1                     Victoria      &lt;NA&gt;
+##    NL_NAME_1    TYPE_1 ENGTYPE_1 CC_1 HASC_1
+## 1       &lt;NA&gt; Territory Territory   12  AU.AS
+## 2       &lt;NA&gt; Territory Territory    8  AU.AC
+## 3       &lt;NA&gt; Territory Territory   11  AU.CR
+## 4       &lt;NA&gt; Territory Territory   10  AU.JB
+## 5       &lt;NA&gt;     State     State    1  AU.NS
+## 6       &lt;NA&gt; Territory Territory    7  AU.NT
+## 7       &lt;NA&gt;     State     State    3  AU.QL
+## 8       &lt;NA&gt;     State     State    4  AU.SA
+## 9       &lt;NA&gt;     State     State    6  AU.TS
+## 10      &lt;NA&gt;     State     State    2  AU.VI
+##                          geometry
+## 1  MULTIPOLYGON (((123.5556 -1...
+## 2  MULTIPOLYGON (((149.138 -35...
+## 3  MULTIPOLYGON (((155.5394 -2...
+## 4  MULTIPOLYGON (((150.7692 -3...
+## 5  MULTIPOLYGON (((149.9447 -3...
+## 6  MULTIPOLYGON (((137.0677 -1...
+## 7  MULTIPOLYGON (((153.4179 -2...
+## 8  MULTIPOLYGON (((140.66 -38....
+## 9  MULTIPOLYGON (((158.6928 -5...
+## 10 MULTIPOLYGON (((146.2929 -3...
+```
+
+---
+
+# Code magic
+
+```
+oz_st &lt;- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), 
+  tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz &lt;- st_as_sf(oz_st)
+```
+
+Get into the habit of reading code. What does this code do? What do the parameters do?
+
+
+---
+
+# Germany
+
+
+```r
+debig &lt;- read_sf("data/gadm36_DEU_shp/gadm36_DEU_1.shp")
+
+de_st &lt;- maptools::thinnedSpatialPoly(as(debig, "Spatial"), 
+  tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+de &lt;- st_as_sf(de_st)
+
+ggplot() + geom_sf(data=de, fill="grey30")
+```
+
+![](02_lab-recap_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+
+Some shapefiles, particulrly for smaller countries, need an adjustment to the parameter settings:
+
+
+```r
+de_st2 &lt;- maptools::thinnedSpatialPoly(as(debig, "Spatial"), 
+  tolerance = 0.025, minarea = 0.001, topologyPreserve = TRUE)
+de2 &lt;- st_as_sf(de_st2)
+ggplot() + geom_sf(data=de2, fill="grey30")
+```
+
+![](02_lab-recap_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+
+
+---
+
+# Approach with purrr
+
+The main idea is to write a function that works on the inner-most element (the matrix), and converts that object into a data frame.
+
+We then apply this function on every element using purrr 
+and then  unnest twice.
+
+
+**This is just one solution - you had a lot of other solutions that are working great!**
+---
+
+# Matrix to Data frame
+
+
+```r
+extract &lt;- function(x) {
+  # x is a list with a single element
+  dm &lt;- x[[1]]
+  
+  dframe &lt;- as.data.frame(dm)
+  names(dframe) &lt;- c("long", "lat")
+  dframe$order = 1:nrow(dframe)
+  dframe
+}
+
+str(extract(oz$geometry[[1]][[1]]))
+```
+
+```
+## 'data.frame':	5 obs. of  3 variables:
+##  $ long : num  124 124 124 124 124
+##  $ lat  : num  -12.5 -12.5 -12.5 -12.5 -12.5
+##  $ order: int  1 2 3 4 5
+```
+---
+
+# Piecing things together
+
+
+```r
+library(tidyverse)
+library(purrr)
+library(tidyr)
+
+ozplus &lt;- oz %&gt;% mutate(
+  data = geometry %&gt;% purrr::map(.f = function(list) {
+    inner = list %&gt;% purrr::map(.f = extract)
+    
+    data.frame(subgroup = 1:length(inner), inner = I(inner))
+  })
+)
+
+ozplus$group &lt;- 1:nrow(ozplus)
+ozplus &lt;- ozplus %&gt;% unnest(data) 
+ozplus &lt;- ozplus %&gt;% unnest(inner)
+
+# make group unique for each part of a multipolygon
+
+ozplus$group &lt;- paste(ozplus$group, ozplus$subgroup, sep="-")
+```
+
+---
+
+# Now plot
+
+
+```r
+ozplus %&gt;% ggplot(aes(x = long, y = lat, group = group)) + geom_polygon()
+```
+
+![](02_lab-recap_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+
+
+---
+
+# Make the code into a function
+
+
+```r
+to_dframe &lt;- function(shapes) {
+  # assume shapes have geometry
+
+  shapesplus &lt;- shapes %&gt;% mutate(
+    data = geometry %&gt;% purrr::map(.f = function(list) {
+      inner = list %&gt;% purrr::map(.f = extract)
+      
+      data.frame(subgroup = 1:length(inner), inner = I(inner))
+    }) 
+  ) %&gt;% select(-geometry)
+  
+  shapesplus$group &lt;- 1:nrow(shapesplus)
+  shapesplus &lt;- shapesplus %&gt;% unnest(data) 
+  shapesplus &lt;- shapesplus %&gt;% unnest(inner)
+  
+  # make group unique for each part of a multipolygon
+  
+  shapesplus$group &lt;- paste(shapesplus$group, shapesplus$subgroup, sep="-")  
+  
+  shapesplus 
+}
+```
+
+---
+
+# Testing your code
+
+
+```r
+to_dframe(oz)
+```
+
+```
+## Simple feature collection with 53139 features and 15 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 112.9225 ymin: -55.11694 xmax: 159.1086 ymax: -9.142306
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##    GID_0    NAME_0   GID_1                      NAME_1 VARNAME_1 NL_NAME_1
+## 1    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 2    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 3    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 4    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 5    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 6    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 7    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 8    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 9    AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+## 10   AUS Australia AUS.1_1 Ashmore and Cartier Islands      &lt;NA&gt;      &lt;NA&gt;
+##       TYPE_1 ENGTYPE_1 CC_1 HASC_1 group subgroup     long       lat order
+## 1  Territory Territory   12  AU.AS   1-1        1 123.5556 -12.53057     1
+## 2  Territory Territory   12  AU.AS   1-1        1 123.5554 -12.53213     2
+## 3  Territory Territory   12  AU.AS   1-1        1 123.5524 -12.53137     3
+## 4  Territory Territory   12  AU.AS   1-1        1 123.5536 -12.53039     4
+## 5  Territory Territory   12  AU.AS   1-1        1 123.5556 -12.53057     5
+## 6  Territory Territory   12  AU.AS   1-2        2 123.0178 -12.25917     1
+## 7  Territory Territory   12  AU.AS   1-2        2 123.0194 -12.26083     2
+## 8  Territory Territory   12  AU.AS   1-2        2 123.0164 -12.26833     3
+## 9  Territory Territory   12  AU.AS   1-2        2 123.0161 -12.25861     4
+## 10 Territory Territory   12  AU.AS   1-2        2 123.0178 -12.25917     5
+##                          geometry
+## 1  MULTIPOLYGON (((123.5556 -1...
+## 2  MULTIPOLYGON (((123.5556 -1...
+## 3  MULTIPOLYGON (((123.5556 -1...
+## 4  MULTIPOLYGON (((123.5556 -1...
+## 5  MULTIPOLYGON (((123.5556 -1...
+## 6  MULTIPOLYGON (((123.5556 -1...
+## 7  MULTIPOLYGON (((123.5556 -1...
+## 8  MULTIPOLYGON (((123.5556 -1...
+## 9  MULTIPOLYGON (((123.5556 -1...
+## 10 MULTIPOLYGON (((123.5556 -1...
+```
+
+---
+
+# The world according to Stat 585
+
+
+```r
+countries &lt;- dir("data", pattern="shp", recursive = TRUE, full.names = TRUE)
+
+# remove all the files from Middle Earth
+countries &lt;- countries[-grep("ME-GIS", countries)]
+
+# only use the outline of each country - that's level 0
+countries &lt;- grep("_0.shp", countries, value = TRUE)
+
+## now we use purrr to create a list of layers
+layers &lt;- purrr::map(countries, function(x) {
+  sfbig &lt;- read_sf(x)
+  stsmall &lt;- maptools::thinnedSpatialPoly(as(sfbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+  sfdata &lt;- st_as_sf(stsmall)
+
+  geom_sf(data = sfdata, aes(fill=NAME_0))
+})
+```
+
+---
+
+
+```r
+ggplot() + layers 
+```
+
+![](02_lab-recap_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+---
+
+# Approaches you took
+
+
+- neat functions we all should know about:
+`flatten()`, 
+`modify_depth()`
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
