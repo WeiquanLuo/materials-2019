@@ -200,6 +200,12 @@ class:inverse
 
 ---
 
+## Testing in R
+
+Rstudio integrates with `testthat` and makes it easy to run your tests after each change in the code.
+
+---
+
 ## Beyond Unit Tests
 
 Unit tests only examine a single function; a package is a group of functions working together. 

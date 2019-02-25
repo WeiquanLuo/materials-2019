@@ -20,6 +20,8 @@ options(htmltools.dir.version = FALSE)
 
 - data in packages
 
+- code examples in the help file
+
 <br>
 <br>
 <br>
@@ -74,4 +76,20 @@ The `usethis` package allows you to directly connect a project to git and github
 "diamonds"
 ```
 
+---
 
+# Examples in packages
+
+- The Roxygen tag `@examples` allows you to write code as an example in the help file.
+
+- Always make use of this feature! It is not only good practice, it is also a first step in checking that your package is running properly
+
+- Your example has to be **stand alone**, i.e. if you are using some data, it needs to be included in the package.
+
+```
+#' @examples
+#' # you can include comments
+#' x <- 1
+#' 5*x
+#' hello("this is a test")
+```
