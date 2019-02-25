@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Stat 585 - Debugging</title>
+    <title>Stat 585 - Writing debuggable code</title>
     <meta charset="utf-8">
     <meta name="author" content="Susan Vanderplas" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
@@ -12,7 +12,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Stat 585 - Debugging
+# Stat 585 - Writing debuggable code
 ### Susan Vanderplas
 
 ---
@@ -26,137 +26,27 @@ class: center, middle
 
 ---
 
-# So, you've got an error?
-
----
-
-## Tools
-
-- `traceback()` - the sequence of calls that led to the error
-    - runs after you've gotten the error
-- Setting breakpoints
-- `browser()` - open an interactive session at an arbitrary breakpoint
-    - can be used to create conditional breakpoints
-- `debug()` - open an interactive session where the error occurred
-    - RStudio has a `rerun with debug` option
-
-### Or... Low Tech
-
-- `print()` statements
-- going line-by-line through the code interactively
-
-&lt;br/&gt;&lt;br/&gt;
-.small[
-Useful References: 
-- [Debugging, condition handling, and defensive programming](http://adv-r.had.co.nz/Exceptions-Debugging.html) by Hadley Wickham
-- [RStudio Debugging Tools](https://support.rstudio.com/hc/en-us/articles/205612627-Debugging-with-RStudio)
-]
-
----
-
-## Traceback
-
-```
-&gt; library(nonpackage)
-Error in library(nonpackage) : there is no package called ‘nonpackage’
-&gt; traceback()
-2: stop(txt, domain = NA)
-1: library(nonpackage)
-```
-
----
-
-## Entering Debug Mode - Breakpoints
-
-1. Set Breakpoints in your functions with Shift+F9 or by clicking on the left of the line number    
-![:scale 50%](https://support.rstudio.com/hc/en-us/article_attachments/201608458/editor-breakpoint.png)
-
-2. 
-    - __Inside a function__ Run the computation that causes the error - debug mode should be triggered at the breakpoint
-    - __Outside a function__ Source the function with `debugSource()` in RStudio
-
----
-
-## Entering Debug Mode - `browser()`
-
-1. Add `browser()` to your function at the point where you want to "peek inside" the function's workings    
-![:scale 50%](https://support.rstudio.com/hc/en-us/article_attachments/201608438/browser-breakpoint.png)
-
-2. Source the code
-
-3. Call the function to get inside at the point where `browser()` is located
-
-
----
-
-## Entering Debug Mode - `debug()`
-
-Mark a function for debugging using `debugonce()` or `debug()`
-
-
-```r
-debugonce(c)
-c(1, 2, 3)
-
-c(6:9)
-```
-
-Stop `debug(function)` with `undebug(function)`
-
----
-
-## Working in Debug Mode
-
-- n or Enter: Execute next statement
-- s: Step into function
-- f: Finish function/loop
-- c: Continue
-- Q: Stop debugging
-- help: Show command list
-
----
-class:inverse
-## Your Turn .tiny[.shift-right[From [Advanced R](http://adv-r.had.co.nz/Exceptions-Debugging.html#debugging-answers)]]
-
-This function should compute the mean of all numeric columns: 
-
-```r
-col_means &lt;- function(df) {
-  numeric &lt;- sapply(df, is.numeric)
-  numeric_cols &lt;- df[, numeric]
-
-  data.frame(lapply(numeric_cols, mean))
-}
-```
-
-Which of the following results are incorrect? Can you modify `col_means()` to be more robust to unusual inputs?
-
-
-```r
-col_means(mtcars)
-col_means(mtcars[, 0])
-col_means(mtcars[0, ])
-col_means(mtcars[, "mpg", drop = F])
-col_means(1:10)
-col_means(as.matrix(mtcars))
-col_means(as.list(mtcars))
-```
-
----
-
 ## Writing Code for Easy Debugging
 
 - Format your code well
+
 - Leave comments 
     - describe what the code is supposed to be doing
+
     - what the input is supposed to be
+
     - what the output should look like    
     ...For each functional unit of code
+
 - Check inputs and verify outputs
     - `stopifnot()` in base R
+
     - `assertthat` package (https://github.com/hadley/assertthat)
+
         - error signaling, input validation, better error messages
+
     - `checkmate` package (https://github.com/mllg/checkmate)
+
         - fast and concise input validation
         
 ---
@@ -167,7 +57,6 @@ Compare the error messages:
 
 
 ```r
-library(assertthat)
 stopifnot(is.character(1:10))
 ```
 
@@ -176,6 +65,7 @@ stopifnot(is.character(1:10))
 ```
 
 ```r
+library(assertthat)
 assert_that(is.character(1:10))
 ```
 
@@ -188,29 +78,30 @@ assert_that(is.character(1:10))
 
 ## Other `assertthat` functions
 
-- `is.flag(x)`: is x TRUE or FALSE? (a boolean flag)
+- `is.flag(x)`: is `x` `TRUE` or `FALSE`? (a boolean flag)
 
-- `is.string(x)`: is x a length 1 character vector?
+- `is.string(x)`: is `x` a length 1 character vector?
 
-- `has_name(x, nm)`, `x %has_name% nm`: does x have component nm?
+- `has_name(x, nm)`, `x %has_name% nm`: does `x` have a component named `nm`?
 
-- `has_attr(x, attr)`, `x %has_attr% attr`: does x have attribute attr?
+- `has_attr(x, attr)`, `x %has_attr% attr`: does `x` have attribute `attr`?
 
-- `is.count(x)`: is x a single positive integer?
+- `is.count(x)`: is `x` a single positive integer?
 
-- `not_empty(x)`: are all dimensions of x greater than 0?
+- `not_empty(x)`: are all dimensions of `x` greater than 0?
 
-- `noNA(x)`: is x free from missing values?
+- `noNA(x)`: is `x` free from missing values?
 
-- `is.dir(path)`: is path a directory?
+- `is.dir(path)`: is `path` a directory?
 
-- `is.writeable(path)`/`is.readable(path)`: is path writeable/readable?
+- `is.writeable(path)`/`is.readable(path)`: is `path` writeable/readable?
 
-- `has_extension(path, extension)`: does file have given extension?
+- `has_extension(path, ext)`: does `file` have the specified extension `ext`?
 
 ---
 class:inverse
 ## Your Turn
+
 Use `assertthat` functions to check inputs and output for the col_means function, ensuring that they make sense.
 
 
@@ -227,21 +118,28 @@ Upload your code to https://gist.github.com/ and see if you can break your neigh
 
 ---
 
-## `Checkmate`
+## `checkmate`
+
+Package `checkmate` implements assertions and checks for speedy evalution ...
 
 Goals: 
+
 - Faster (C backend)
+
 - Better memory handling - no intermediate objects created
+
 - Single call to check e.g. length, missingness, and lower/upper bounds (more concise)
 
 (Preview...) Also interfaces with `testthat` for unit tests.
+
 ---
 
-## `Checkmate`
+## `checkmate`
 
 - `assert*` to check type, length, any missing,  type-specific attributes (limits, character lengths, row/col names, ...)    
 also `assert_*` if you prefer that syntax
     - Throw an error if the check fails
+    
     - Checked object returned invisibly on success
         - can be used with pipes!
 
@@ -251,14 +149,17 @@ also `assert_*` if you prefer that syntax
 
 - `check*` functions
     - return error message as a string if the conditions fail
+
     - return TRUE otherwise
+
     - used in `assert*`, `test*`, `expect*` functions
   
 
 ---
 class:inverse
 ## Your Turn
-Use `checkmate` functions to check inputs and output for the col_means function, ensuring that they make sense.
+
+Use `checkmate` functions to check inputs and output for the `col_means` function, ensuring that they make sense.
 
 
 ```r
