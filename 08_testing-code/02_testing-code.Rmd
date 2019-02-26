@@ -17,7 +17,9 @@ class: center, middle
 options(htmltools.dir.version = FALSE)
 ```
 
-# Unit Testing
+> a common mistake that people make when trying to design something completely foolproof is to underestimate the ingenuity of complete fools 
+
+-Douglas Adams, _Mostly Harmless_
 
 ---
 
