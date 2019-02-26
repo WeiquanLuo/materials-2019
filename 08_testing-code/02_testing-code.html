@@ -112,6 +112,58 @@ library(testthat)
 
 ---
 
+## Testing in R
+
+Rstudio integrates with `testthat` and makes it easy to run your tests after each change in the code.
+
+```
+&gt; usethis::use_testthat()
+✔ Setting active project to './test_projects/helloR'
+✔ Adding 'testthat' to Suggests field in DESCRIPTION
+✔ Creating 'tests/testthat/'
+✔ Writing 'tests/testthat.R'
+```
+
+Test files go in tests/testthat/test_&lt;some-description&gt;.R
+
+To run your tests, Ctrl-Shift-T or use the build menu
+
+.center[![:scale 60%](rstudio-build-interface-tests.png)]
+
+---
+
+## Testing in R
+
+The `testthis` package provides some RStudio addins to help with testing.
+
+
+```r
+install.packages("testthis")
+```
+
+Create a new test file for the currently selected file by running `testthis::test_skeleton()` in the console.
+
+```
+&gt; testthis::test_skeleton()
+* Creating `tests/testthat/test_hello.R`
+```
+
+.center[![:scale 90%](testthis_skeleton_file.png)]
+
+---
+class:inverse
+## Your Turn
+
+1. Create a new R package, `helloR`
+
+2. Set up the package to work with `testthat`
+
+3. Create a test skeleton file with `testthis::test_skeleton()` for the default `hello.R` file in the R package subdirectory
+
+4. Add your package to github with `usethis::use_github()`
+
+---
+
 ## Trivial Example
 
 Function: `mean(x, na.rm)`
@@ -204,6 +256,8 @@ expect_true(is.na(mean(c(1:8, NA))))
 class:inverse
 ## Your Turn
 
+Add an R function to the `hello.R` file.
+
 - Function specifications: 
     - name: `sign_root`
     - Parameters n and value, both numeric
@@ -212,11 +266,171 @@ class:inverse
         - with the same sign as `value`
         - with magnitude equal to the `n`th root of `value`.
 
-1. Write the tests for this function
+1. Write the tests for this function in the appropriate place in `tests/testthat/test_hello.R`
 
-2. Write the function and upload to https://gist.github.com/
+2. Write the function in `R/hello.R`. Upload `R/hello.R` to https://gist.github.com/ (you only need to upload the single file).
+.small[Don't forget to add assertions to your function to check inputs!]
 
-3. Use your tests on your neighbor's function - do they pass?
+3. Use your tests on your neighbor's function using the link to their github gist - do they pass?
+
+---
+
+## Solution - Tests
+
+
+```r
+context("hello")
+
+# - Function specifications:
+#   - name: `sign_root`
+# - Parameters n and value, both numeric
+# - Function should error if `n` or `value` is not numeric
+# - Function should return a number
+# - with the same sign as `value`
+# - with magnitude equal to the `n`th root of `value`.
+
+test_that("sign_root works as expected", {
+  expect_error(sign_root(n = "a", value = 2))
+  expect_error(sign_root(n = 2, value = "a"))
+  expect_equivalent(sign_root(2, 4), 2)
+  expect_equivalent(sign_root(2, -4), -2)
+  expect_equivalent(sign_root(3, 8), 2)
+  expect_equivalent(sign_root(3, -8), -2)
+})
+```
+
+---
+
+## Solution - Function
+
+
+```r
+#' Take the nth root of a value, but keep the sign intact
+#'
+#' @param n root to take (n = 2 would correspond to the square root)
+#' @param value value to take the root of
+#' @return the nth root of abs(value) with the sign of value
+#' @export
+sign_root &lt;- function(n = 2, value = 4) {
+  checkmate::check_number(n, na.ok = T)
+  checkmate::check_number(value, na.ok = T)
+
+  abs(value) ^ (1/n) * sign(value)
+}
+```
+
+---
+
+## Continuous Integration
+
+Running tests after every slight change can be tedious.
+
+--
+
+What if we automate it?
+
+[Travis CI](https://travis-ci.org/) can be used with github to automatically 
+1. set up a test environment
+2. install all dependencies
+3. build your package
+4. run all tests
+5. (optional) calculate code coverage and upload to a service like [codecov.io](https://codecove.io)
+
+---
+
+## Continuous Integration
+
+Setting up Travis for your R package:
+
+1. [Make an account](https://travis-ci.org/) and link to your GitHub account
+2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
+![:scale 60%](switch_travis_repo_on.png)
+
+---
+
+## Continuous Integration
+
+Setting up Travis for your R package:
+
+1. [Make an account](https://travis-ci.org/) and link to your GitHub account
+2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
+3. Add a `.travis.yml` file to your repository: `devtools::use_travis()`
+4. Add .travis.yml to .Rbuildignore
+
+A new build will be triggered when you push changes to your github repository.
+
+---
+class:inverse
+## Your Turn
+
+1. Set up travis for your helloR repository
+
+2. Try to get your travis build working. You may have to: 
+    - add documentation    
+    (Build menu -&gt; Generate documentation with roxygen, then Ctrl/Cmd-Shift-D)
+    
+    - add a license: `usethis::use_gpl3_license(name="your name")`
+    
+    - Run `devtools::check()` (Ctrl/CMD-Shift-E)
+    
+    - Make sure your tests pass
+
+
+---
+
+## Continuous Integration
+
+&lt;blockquote class="twitter-tweet" data-lang="en"&gt;&lt;p lang="en" dir="ltr"&gt;Things are going great; why do you ask?! &lt;a href="https://twitter.com/hashtag/rstats?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#rstats&lt;/a&gt; 
+
+![:scale 70%](https://pbs.twimg.com/media/CgbixfuVAAAWgZn.jpg)
+
+&lt;/p&gt;&amp;mdash; Julia Silge (@juliasilge) &lt;a href="https://twitter.com/juliasilge/status/722514130968535042?ref_src=twsrc%5Etfw"&gt;April 19, 2016&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+
+---
+
+## Continuous Integration
+
+The last Your Turn resulted in...
+![](travis_is_depressing.png)
+
+.center[![:scale 70%](travis_is_depressing2.png)]
+
+---
+
+## Code Coverage
+
+&gt; How many unit tests are enough?
+
+- `covr` is a package that will:
+    1. build your package in a clean environment 
+    2. run your tests
+    3. determine how many times each line was evaluated (through [magic](https://cran.r-project.org/web/packages/covr/vignettes/how_it_works.html))
+    4. launch a Shiny app to show you line-by-line coverage reports
+    
+- 100% coverage is good, but unit tests aren't everything
+    - Some lines aren't worth testing
+    - Integration testing matters too!
+
+
+```r
+covr::report() # Run a local code coverage report
+
+# Enable codecov.io with your github account
+# This requires travis integration, but generates coverage reports 
+#   automatically with every change you push to the github repo
+usethis::use_coverage(type = "codecov") 
+```
+
+---
+class:inverse
+## Your Turn
+
+1. Run a code coverage report locally for your helloR package using `covr::report()`
+
+2. Stretch goal: Try to get coverage configured using [codecov.io](https://codecov.io/github/srvanderplas/helloR?branch=master)
+
+
 
 ---
 
@@ -292,74 +506,6 @@ Functional test:
 - High-level testing (integration, functional) is hard to automate and requires human intervention
 
 - Version control is essential to this process - track tests and changes
-
----
-
-## Code Coverage
-
-&gt; How many unit tests are enough?
-
-- `covr` is a package that will:
-    1. build your package in a clean environment 
-    2. run your tests
-    3. determine how many times each line was evaluated (through [magic](https://cran.r-project.org/web/packages/covr/vignettes/how_it_works.html))
-    4. launch a Shiny app to show you line-by-line coverage reports
-    
-- 100% coverage is good, but unit tests aren't everything
-    - Some lines aren't worth testing
-    - Integration testing matters too!
-
-
----
-
-## Continuous Integration
-
-Running tests after every slight change can be tedious.
-
---
-
-What if we automate it?
-
-[Travis CI](https://travis-ci.org/) can be used with github to automatically 
-1. set up a test environment
-2. install all dependencies
-3. build your package
-4. run all tests
-5. (optional) calculate code coverage and upload to a service like [codecov.io](https://codecove.io)
-
----
-
-## Continuous Integration
-
-Setting up Travis for your R package:
-
-1. [Make an account](https://travis-ci.org/) and link to your GitHub account
-2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
-![:scale 60%](switch_travis_repo_on.png)
-
----
-
-## Continuous Integration
-
-Setting up Travis for your R package:
-
-1. [Make an account](https://travis-ci.org/) and link to your GitHub account
-2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
-3. Add a `.travis.yml` file to your repository: `devtools::use_travis()`
-4. Add .travis.yml to .Rbuildignore
-
-A new build will be triggered when you push changes to your github repository.
-
----
-
-## Continuous Integration
-
-&lt;blockquote class="twitter-tweet" data-lang="en"&gt;&lt;p lang="en" dir="ltr"&gt;Things are going great; why do you ask?! &lt;a href="https://twitter.com/hashtag/rstats?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#rstats&lt;/a&gt; 
-
-![:scale 70%](https://pbs.twimg.com/media/CgbixfuVAAAWgZn.jpg)
-
-&lt;/p&gt;&amp;mdash; Julia Silge (@juliasilge) &lt;a href="https://twitter.com/juliasilge/status/722514130968535042?ref_src=twsrc%5Etfw"&gt;April 19, 2016&lt;/a&gt;&lt;/blockquote&gt;
-&lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
