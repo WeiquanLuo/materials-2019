@@ -107,11 +107,16 @@ This is not an exhaustive list of checks...
 library(assertthat)
 
 col_means <- function(df) {
-  assert_that(is.data.frame(df)) # Check input is a data frame
+  assert_that(
+    is.data.frame(df), # Check input is a data frame
+    not_empty(df) # Check that df has at least one row and column
+  )
   numeric <- sapply(df, is.numeric)
   assert_that(length(numeric) > 0) # >= one numeric column
+  
   numeric_cols <- df[, numeric]
-
+  # ensure numeric_cols has at least one row and column
+  assert_that(length(dim(numeric)) == 2) 
   list_res <- lapply(numeric_cols, mean)
   res <- data.frame(list_res)
   assert_that(
@@ -191,11 +196,14 @@ This is not an exhaustive list of checks...
 library(checkmate)
 
 col_means <- function(df) {
-  assert_data_frame(df) # Check input is a data frame
+  assert_data_frame(df, min.rows = 1, min.cols = 1) # Check input is a data frame
+  
   numeric <- sapply(df, is.numeric)
   assert_atomic_vector(numeric, min.len = 1) # >= one numeric col
+  
   numeric_cols <- df[, numeric]
-
+  assert_data_frame(df, min.rows = 1, min.cols = 1) # numeric_cols is a data frame
+  
   list_res <- lapply(numeric_cols, mean)
   res <- data.frame(list_res)
   assert_data_frame(
