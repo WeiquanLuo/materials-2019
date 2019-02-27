@@ -21,15 +21,60 @@ class: center, middle
 
 
 
-&gt; a common mistake that people make when trying to design something completely foolproof is to underestimate the ingenuity of complete fools 
+## Outline
+.left[
+- Motivation
 
--Douglas Adams, _Mostly Harmless_
+- Automated Testing and Unit Tests
+
+- Testing in R: `testthat`
+
+- Automatic Testing with TravisCI
+
+- Test coverage with `covr`
+]
+
+---
+
+## So you have a package
+
+Workflow:
+
+1. Write a function.
+
+2. Load it with `Ctrl/Cmd + Shift + L` or `devtools::load_all()`
+
+3. Experiment with it in the console to see if it works.
+
+4. Rinse and repeat.
+
+&lt;br/&gt;&lt;br/&gt;
+--
+
+Testing in this workflow is informal, but can be repetitive and tedious. 
+
+---
+class:middle,center
+# Automated Testing
 
 ---
 
 ## Unit tests
 
-_"Unit" tests_ are tests that evaluate one feature of a function
+Tests that evaluate one feature of a function
+
+
+
+They are run automatically after you make changes to the code
+
+
+
+Unit tests are one part of the larger framework of _Test Driven Development_
+
+
+--
+
+## Test Driven Development
 
 _Test Driven Development_ is an approach to programming where the unit tests are written before the actual code
 
@@ -37,11 +82,9 @@ _Test Driven Development_ is an approach to programming where the unit tests are
 
 - Code must meet the requirements (and only the requirements)
 
-- Like anything, TDD can be taken to an extreme
-
 ---
 
-## Unit tests
+## Why use unit tests?
 
 For a bit of extra work, you get: 
 
@@ -51,172 +94,233 @@ For a bit of extra work, you get:
     - When debugging, write a test to pinpoint the bug (and stop it from reoccurring)
 
 - Better code structure
-    - Unit testing encourages modular code with functions that do only one thing
-    - Easier to document functions when you're writing them to meet tests
+    - Modular code: do only one thing per function
+    - Document functions as you write them to satisfy tests
 
 - Robust code 
     - make big changes quickly and without downstream problems
     - Any changes that break things should be caught with tests
 
-- (in theory) Easier restarts - pick up at the last failed test and write code to satisfy that test
+- (in theory) Easier to start after a break:    
+pick up at the last failed test and write code to satisfy that test
 
 ---
 
-## Unit tests
-
-- Modular (by design)
-
-- Tests should run quickly
-
-- Each test (or set of tests) is run in a clean environment
-
-- Set-up and Tear-down tasks are used to set up environments for testing
-
-- Should not depend on outside files (traditionally)
-        
+# Testing in R: `testthat`
 
 ---
 
-## Unit tests
+## Tools for package testing
 
-&gt; But, we're statisticians. What about the data?
+1. `testthat`: unit testing for R packages
+  
+  - structured R package testing
+  
+  - provides functions to set up and tear down testing environments
+  
+  - runs each set of tests in a clean environment
+  
+  - reports whether each test passes or fails
 
-- use tiny test data (`dput()` is helpful)
+2. `usethis`: helper functions for R package development
 
-- read in toy data from files in the test directory
+  - set up `testthat` for your package: `use_testthat()`
+  
+  - create new test files: `use_test("testname")` creates a new test file
 
-- use data included with the package
-
-- use data included in base R
-
-- download data from elsewhere with a set-up function, delete it with a tear-down function
-    - tests will fail without internet or if the site is down
-    
----
-
-## Tools
-
-The `testthat` package provides a framework for unit tests if you are working within a package. 
-.small[[This github issue](https://github.com/r-lib/testthat/issues/659) has a good discussion of testing outside of the package framework]
-
-
-```r
-## install.packages("testthat")
-library(testthat)
-```
-
-### Optional
-
-- `usethis`: help with setting up testing and continuous integration (later)
-- `testthis`: RStudio addins to make testing easier.
-- `covr`: reports on how much of your code is covered by tests
-- `visualTest`[(on Github)](https://github.com/MangoTheCat/visualTest) or `vdiffr`:  testing graphical output
+.small[Note: `testthat` works with packages. [This github issue](https://github.com/r-lib/testthat/issues/659) has a good discussion of testing outside of the package framework]
 
 ---
 
-## Testing in R
+## Unit Testing Workflow
 
-Rstudio integrates with `testthat` and makes it easy to run your tests after each change in the code.
+1. Modify your code or tests
 
-```
-&gt; usethis::use_testthat()
-✔ Setting active project to './test_projects/helloR'
-✔ Adding 'testthat' to Suggests field in DESCRIPTION
-✔ Creating 'tests/testthat/'
-✔ Writing 'tests/testthat.R'
-```
+2. Test your package (`Ctrl/CMD - Shift - T`)
 
-Test files go in tests/testthat/test_&lt;some-description&gt;.R
-
-To run your tests, Ctrl-Shift-T or use the build menu
-
-.center[![:scale 60%](rstudio-build-interface-tests.png)]
-
----
-
-## Testing in R
-
-The `testthis` package provides some RStudio addins to help with testing.
-
-
-```r
-install.packages("testthis")
-```
-
-Create a new test file for the currently selected file by running `testthis::test_skeleton()` in the console.
-
-```
-&gt; testthis::test_skeleton()
-* Creating `tests/testthat/test_hello.R`
-```
-
-.center[![:scale 90%](testthis_skeleton_file.png)]
+3. Repeat until all tests pass
 
 ---
 class:inverse
 ## Your Turn
 
-1. Create a new R package, `helloR`
 
-2. Set up the package to work with `testthat`
+```r
+## install.packages(c("testthat", "usethis"))
+library(testthat)
+```
 
-3. Create a test skeleton file with `testthis::test_skeleton()` for the default `hello.R` file in the R package subdirectory
+1. Install the `testthat` package for unit testing and the `usethis` package (helper functions to make package development easy)
 
-4. Add your package to github with `usethis::use_github()`
+2. Set up a github repository for your new package
+
+3. Create a new R package, `helloR`, and set it up to work with `testthat`
+
+```r
+# Run create_package to add package infrastructure 
+# Adjust the path to refer to your current project directory
+usethis::create_package("../helloR") 
+usethis::use_testthat()
+```
+
+What does your file structure look like now? 
 
 ---
 
-## Trivial Example
+## Testing Structure
 
-Function: `mean(x, na.rm)`
+A test file consists of 
+
+1. context - a description of the test blocks in the file
+
+2. one or more test blocks:    
+`test_that(description, {test statements})`
+
+
+```r
+context("test-basics")
+
+# Test block
+test_that(
+  # description
+  "multiplication works",
+  { # test statements inside this block
+    expect_equal(2 * 2, 4)
+  }
+)
+```
+---
+
+## Test Statements
+
+`testthat` has a series of expectation functions:
+
+function | description
+---- | ----
+`expect_equal(obj, value)` | Is the object equal to a value?
+`expect_error(expr)` | Does the expression produce an error?
+`expect_gt(obj, value)` | Is the object greater than the value?
+`expect_length(obj, value)` | Does the object have length value?
+
+See more with `help(package = "testthat")`
+
+These functions are silent if the expectation is met, and throw an error otherwise.
+
+Expectations are used to construct tests. 
+&lt;!-- When included in a test file, they will be run automatically; when run on their own, you can see how they work --&gt;
+
+---
+class:inverse
+## Your Turn - Writing Expectations
+
+1. Create a test file with `usethis::use_test("mtcars")`
+
+2. Write a set of expectations that test the `mtcars` data to make sure it has the correct format    
+What are the important/essential features of the data?
+
+
+.center[![:scale 30%](https://www.aliensthetruth.com/images/ufo-abduction.jpg)]
+.center[If `mtcars` was abducted, would you notice?]
+
+---
+
+## Solutions
+
+```r
+data(mtcars)
+
+# correct type
+expect_s3_class(mtcars, "data.frame")
+
+# correct dimensions
+expect_equivalent(dim(mtcars), c(32, 11))
+
+# correct column names
+expect_named(mtcars, c("mpg", "cyl", "disp", "hp", "drat", 
+                       "wt", "qsec", "vs", "am", "gear", "carb"))
+```
+
+---
+
+## Solutions
+
+```r
+# hardcore option: use dput() to record mtcars structure
+# dput(head(mtcars))
+mtcars_head &lt;- structure(
+  list(
+    mpg = c(21, 21, 22.8, 21.4, 18.7, 18.1), 
+    cyl = c(6, 6, 4, 6, 8, 6), 
+    disp = c(160, 160, 108, 258, 360, 225), 
+    hp = c(110, 110, 93, 110, 175, 105), 
+    drat = c(3.9, 3.9, 3.85, 3.08, 3.15, 2.76), 
+    wt = c(2.62, 2.875, 2.32, 3.215, 3.44, 3.46), 
+    qsec = c(16.46, 17.02, 18.61, 19.44, 17.02, 20.22), 
+    vs = c(0, 0, 1, 1, 0, 1), 
+    am = c(1, 1, 1, 0, 0, 0), 
+    gear = c(4, 4, 4, 3, 3, 3), 
+    carb = c(4, 4, 1, 1, 2, 1)), 
+  row.names = c("Mazda RX4", "Mazda RX4 Wag", "Datsun 710", 
+                "Hornet 4 Drive", "Hornet Sportabout", "Valiant"), 
+  class = "data.frame")
+expect_equivalent(head(mtcars), mtcars_head)
+```
+
+Choose your tests carefully - too specific, and they'll break unnecessarily
+
+---
+
+## Test-Driven Development Workflow
+
+1. Write out the specifications for your function
+
+2. Create your test file `usethis::use_test("foo")`
+
+3. Write tests for your function in `tests/testthat/test_foo.R`
+
+4. Write your function and documentation in `R/foo.R`
+
+5. Test your package: `Ctrl/CMD - Shift - T` or use the Build Menu
+
+.center[![:scale 60%](rstudio-build-interface-tests.png)]
+
+---
+
+## Test-Driven Development Example
+
+Function: `mymean(x, na.rm)`
 
 Important behaviors: 
 
 --
 
-- issue a warning or error when x is not numeric (or if x cannot be coerced to a numeric vector)
+- issue an error when x is not numeric
 
 --
 
-- return a single numeric value equal to sum(x)/length(x)
-    - when x has no NA values
-    - when x is numeric and na.rm = T
+- return a value equal to `sum(x)/length(x)` when x has no `NA` values or `na.rm = T`
 
---
-
-- return NA when x has NAs and na.rm = F
+- return `NA` when x has `NA`s and `na.rm = F`
 
 ---
 
-## Trivial Example Tests
+## Test-Driven Development Example
 
 Important behaviors: 
 
-- issue an error when x is not numeric (or if x cannot be coerced to a numeric vector)
+- issue an error when x is not numeric    
+(or if x cannot be coerced to a numeric vector)
 
 ```r
 x &lt;- letters[1:3]
-mean(x)
-```
-
-```
-## Warning in mean.default(x): argument is not numeric or logical: returning
-## NA
-```
-
-```
-## [1] NA
-```
-
-```r
-expect_warning(mean(x)) # This is the minimal test
-expect_warning(mean(x), # This tests for a specific warning
+expect_warning(mymean(x)) # This is the minimal test
+expect_warning(mymean(x), # This tests for a specific warning
                "argument is not numeric or logical: returning NA") 
 ```
 
 ---
 
-## Trivial Example Tests
+## Test-Driven Development Example
 
 Important behaviors: 
 - return a single numeric value equal to sum(x)/length(x)
@@ -225,40 +329,51 @@ Important behaviors:
 ```r
 x &lt;- 1:8
 y &lt;- c(1:8, NA)
-z &lt;- c(T, F)
 
 # Test that mean(1:8) returns a numerically correct response
-expect_equal(mean(x), 4.5)
-
-# Test that mean(c(T, F)) returns 0.5
-expect_equal(mean(z), 0.5)
+expect_equal(mymean(x), 4.5)
 
 # Test that mean(c(1:8, NA)) equals mean(1:8) when na.rm = T
-expect_equal(mean(y, na.rm = T), mean(x))
+expect_equal(mymean(y, na.rm = T), mymean(x))
 ```
 
 ---
 
-## Trivial Example Tests
+## Test-Driven Development Example
 
 - return NA when na.rm = F and x has NAs
 
 ```r
 # Can also test to see if a test fails...
 expect_failure(
-  expect_equal(mean(c(1:8, NA), na.rm = F), mean(c(1:8)))
+  expect_equal(mymean(c(1:8, NA), na.rm = F), mymean(c(1:8)))
 )
 
 # Or test if something returns NA
-expect_true(is.na(mean(c(1:8, NA))))
+expect_true(is.na(mymean(c(1:8, NA))))
 ```
-
 
 ---
 class:inverse
 ## Your Turn
 
-Add an R function to the `hello.R` file.
+In your `helloR` package, do the following: 
+
+1. Create the file `R/mymean.R` for your `mymean` function
+
+2. Create a test file for `mymean`: `usethis::use_test("mymean")`
+
+3. Add the expectations in the previous slides to your test file
+
+4. Write the `mymean` function in `R/mymean.R`
+
+5. Save your test and code files, then test your package. Did your function pass?
+
+---
+class:inverse
+## Your Turn
+
+Create a new function for your `helloR` package. 
 
 - Function specifications: 
     - name: `sign_root`
@@ -268,12 +383,12 @@ Add an R function to the `hello.R` file.
         - with the same sign as `value`
         - with magnitude equal to the `n`th root of `value`.
 
-1. Write the tests for this function in the appropriate place in `tests/testthat/test_hello.R`
+1. Create a test file for this function and write appropriate tests
 
-2. Write the function in `R/hello.R`. Upload `R/hello.R` to https://gist.github.com/ (you only need to upload the single file).
-.small[Don't forget to add assertions to your function to check inputs!]
+2. Write the function    
+.small[Don't forget to add assertions to your function to check inputs!&lt;br/&gt;The `checkmate` package is your friend!]
 
-3. Use your tests on your neighbor's function using the link to their github gist - do they pass?
+3. Does your function pass your tests? How do your tests compare to your neighbor's?
 
 ---
 
@@ -281,7 +396,7 @@ Add an R function to the `hello.R` file.
 
 
 ```r
-context("hello")
+context("sign_root")
 
 # - Function specifications:
 #   - name: `sign_root`
@@ -323,13 +438,55 @@ sign_root &lt;- function(n = 2, value = 4) {
 
 ---
 
-## Continuous Integration
+## Unit tests are...
 
-Running tests after every slight change can be tedious.
+- Modular (by design)
+
+- Quick to run
+
+- Run in an clean environment&lt;br/&gt;    
+    - Set up and Tear down tasks set up the environment for testing
+    
+- Independent - don't require outside files (traditionally)
+
+---
+
+## Unit tests
+
+&gt; But, we're statisticians. What about the data?
+
+- use tiny test data (`dput()` is helpful)
+
+- read in toy data from files in the test directory
+
+- use data included with the package
+
+- use data included in base R
+
+- download data from elsewhere with a set-up function, delete it with a tear-down function
+    - tests will fail without internet or if the site is down
+
+---
+class:middle,center
+# Continuous Integration - TravisCI
+
+---
+
+## Motivation
+
+The package build - modify - test cycle can be tedious. 
+
+Sometimes, your package is written in a way that depends on your R environment. 
+
+How do you determine if things will work on a different computer?
 
 --
 
-What if we automate it?
+You test the package build/install process as well!
+
+---
+
+## Continuous Integration
 
 [Travis CI](https://travis-ci.org/) can be used with github to automatically 
 1. set up a test environment
@@ -356,8 +513,7 @@ Setting up Travis for your R package:
 
 1. [Make an account](https://travis-ci.org/) and link to your GitHub account
 2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
-3. Add a `.travis.yml` file to your repository: `devtools::use_travis()`
-4. Add .travis.yml to .Rbuildignore
+3. Enable travis for your package: `usethis::use_travis()`
 
 A new build will be triggered when you push changes to your github repository.
 
@@ -376,7 +532,6 @@ class:inverse
     - Run `devtools::check()` (Ctrl/CMD-Shift-E)
     
     - Make sure your tests pass
-
 
 ---
 
@@ -400,9 +555,13 @@ The last Your Turn resulted in...
 
 ---
 
+# Code Coverage: `covr`
+
+---
+
 ## Code Coverage
 
-&gt; How many unit tests are enough?
+&gt; How many unit tests are enough? Is everything tested?
 
 - `covr` is a package that will:
     1. build your package in a clean environment 
@@ -431,83 +590,6 @@ class:inverse
 1. Run a code coverage report locally for your helloR package using `covr::report()`
 
 2. Stretch goal: Try to get coverage configured using [codecov.io](https://codecov.io/github/srvanderplas/helloR?branch=master)
-
-
-
----
-
-## Beyond Unit Tests
-
-Unit tests only examine a single function; a package is a group of functions working together. 
-
-_Integration tests_ look at how functions work together to perform a task.
-
-_Functional tests_ look at the whole package
-
-.center[&lt;img alt="Testing Pyramid" src = "https://cdn.softwaretestinghelp.com/wp-content/qa/uploads/2016/12/image-result-for-unit-testing-vs-functional-testin.png" width = 50%/&gt;    
-.small[Source: https://www.softwaretestinghelp.com/the-difference-between-unit-integration-and-functional-testing]]
-
----
-
-## Example: Types of Testing
-.left-column[
-![Flour](https://upload.wikimedia.org/wikipedia/commons/6/64/All-Purpose_Flour_%284107895947%29.jpg)
-]
-.right-column[
-Unit tests: 
-
-- salt is salty
-- yeast is alive
-- water behaves as expected (freezes at 0&lt;span&gt;&amp;#176;&lt;/span&gt; C, boils at 100&lt;span&gt;&amp;#176;&lt;/span&gt;C)
-- flour has correct gluten, texture, composition
-- oven turns on and can reach the correct temperature
-
-]
-
-
----
-
-## Example: Types of Testing
-
-.left-column[
-![Dough rising](https://upload.wikimedia.org/wikipedia/commons/archive/6/66/20100215172032%21Breaddough1.jpg)
-
-&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
-![Bread picture](https://c.pxhere.com/photos/ab/fc/bread_baguette_eat_food_baked_goods_delicious_white_bread_bake-830372.jpg!d)
-
-]
-.right-column[
-
-
-Integration tests:
-
-- Yeast dissolves in water (yeast + water)
-
-- Adding flour to yeast and water causes the yeast to grow and bubble (flour + yeast + water)
-
-- Kneading the dough causes gluten to develop properly (action + dough)
-
-- Dough rises (dough + oven)
-
-
-Functional test:
-
-- Bread is tasty (bread + user)
-]
-
----
-
-## Limitations
-
-- Can't test every possible input combination in most applications
-
-- It's hard to create realistic tests
-
-- Unit testing alone is not sufficient - must test integration and how actual humans use the software
-
-- High-level testing (integration, functional) is hard to automate and requires human intervention
-
-- Version control is essential to this process - track tests and changes
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>

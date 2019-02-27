@@ -1,0 +1,88 @@
+---
+title: "Stat 585 - Beyond unit tests"
+author: "Susan Vanderplas"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts, "tweaks.css"]
+    nature:
+      beforeInit: "macros.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+## Beyond Unit Tests
+
+Unit tests only examine a single function; a package is a group of functions working together. 
+
+_Integration tests_ look at how functions work together to perform a task.
+
+_Functional tests_ look at the whole package
+
+.center[<img alt="Testing Pyramid" src = "https://cdn.softwaretestinghelp.com/wp-content/qa/uploads/2016/12/image-result-for-unit-testing-vs-functional-testin.png" width = 50%/>    
+.small[Source: https://www.softwaretestinghelp.com/the-difference-between-unit-integration-and-functional-testing]]
+
+---
+
+## Example: Types of Testing
+.left-column[
+![Flour](https://upload.wikimedia.org/wikipedia/commons/6/64/All-Purpose_Flour_%284107895947%29.jpg)
+]
+.right-column[
+Unit tests: 
+
+- salt is salty
+- yeast is alive
+- water behaves as expected (freezes at 0<span>&#176;</span> C, boils at 100<span>&#176;</span>C)
+- flour has correct gluten, texture, composition
+- oven turns on and can reach the correct temperature
+
+]
+
+
+---
+
+## Example: Types of Testing
+
+.left-column[
+![Dough rising](https://upload.wikimedia.org/wikipedia/commons/archive/6/66/20100215172032%21Breaddough1.jpg)
+
+<br/><br/><br/><br/>
+![Bread picture](https://c.pxhere.com/photos/ab/fc/bread_baguette_eat_food_baked_goods_delicious_white_bread_bake-830372.jpg!d)
+
+]
+.right-column[
+
+
+Integration tests:
+
+- Yeast dissolves in water (yeast + water)
+
+- Adding flour to yeast and water causes the yeast to grow and bubble (flour + yeast + water)
+
+- Kneading the dough causes gluten to develop properly (action + dough)
+
+- Dough rises (dough + oven)
+
+
+Functional test:
+
+- Bread is tasty (bread + user)
+]
+
+---
+
+## Limitations
+
+- Can't test every possible input combination in most applications
+
+- It's hard to create realistic tests
+
+- Unit testing alone is not sufficient - must test integration and how actual humans use the software
+
+- High-level testing (integration, functional) is hard to automate and requires human intervention
+
+- Version control is essential to this process - track tests and changes
+-->
