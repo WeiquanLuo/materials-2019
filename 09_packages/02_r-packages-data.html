@@ -39,7 +39,9 @@ class: inverse
 
 `usethis` is a package to help with organizing your workflow in packages and non-package projects
 
-Go through the [README](https://usethis.r-lib.org/) site of `usethis` and try the commands out to create a new package
+Read through the [README](https://usethis.r-lib.org/) site of `usethis`.
+
+Create a new package using `usethis` functionality. Make sure to not use `tempdir()` as the location for the new package, but a more suitable location.
 
 Use `usethis` functionality to set up a README.Rmd file and a NEWS.md file.
 
@@ -61,9 +63,25 @@ The `usethis` package allows you to directly connect a project to git and github
 
 ## Data in a package
 
-- Data frames must be stored in the `data` folder using the command `save`. 
+- Data frames must be stored in the `data` folder using the command `save`.
 
-- Data documentation: http://r-pkgs.had.co.nz/data.html#documenting-data
+- Data the `usethis` way:
+
+```
+use_data
+function (..., internal = FALSE, overwrite = FALSE, compress = "bzip2")
+```
+
+`use_data` places a data object into the `data` folder.
+
+internal data (used by the package not by the users of a package) is placed in the file `sysdata.rda`
+
+
+---
+
+## Data documentation
+
+- Documenting data in packages: http://r-pkgs.had.co.nz/data.html#documenting-data
 
 ```
 #' Prices of 50,000 round cut diamonds.
@@ -80,6 +98,9 @@ The `usethis` package allows you to directly connect a project to git and github
 #' @source \url{http://www.diamondse.info/}
 "diamonds"
 ```
+
+
+General convention is to have a `data.r` file in the folder R that consists of data documentation.
 
 ---
 
@@ -98,6 +119,29 @@ The `usethis` package allows you to directly connect a project to git and github
 #' 5*x
 #' hello("this is a test")
 ```
+
+---
+
+# Package website
+
+The package `pkgdown` creates web pages based on all the files in a package
+
+`pkgdown` supports making websites for your package (see e.g. [x3ptools](https://heike.github.io/x3ptools/), [ggplot2](https://ggplot2.tidyverse.org/), ... and soon yours)
+
+Process:
+
+```
+pkgdown::build_site()
+```
+
+
+Assuming your package has a github repo, add the `docs` folder to the repo 
+
+In `Settings` for your repo, switch GitHub Pages to the docs folder (see screenshot)
+
+---
+
+![](images/github-docs.png)
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
