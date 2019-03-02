@@ -82,6 +82,7 @@ _Test Driven Development_ is an approach to programming where the unit tests are
 
 - Code must meet the requirements (and only the requirements)
 
+
 ---
 
 ## Why use unit tests?
@@ -105,7 +106,7 @@ For a bit of extra work, you get:
 pick up at the last failed test and write code to satisfy that test
 
 ---
-
+class:middle,center
 # Testing in R: `testthat`
 
 ---
@@ -132,7 +133,7 @@ pick up at the last failed test and write code to satisfy that test
 
 ---
 
-## Unit Testing Workflow
+## Package Testing Workflow
 
 1. Modify your code or tests
 
@@ -267,6 +268,32 @@ expect_equivalent(head(mtcars), mtcars_head)
 ```
 
 Choose your tests carefully - too specific, and they'll break unnecessarily
+
+---
+
+## Solutions
+
+```r
+library(checkmate)
+
+test_data_frame(mtcars,
+                # correct dimensions 
+                nrow = 32, ncol = 11)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+test_names(mtcars, 
+           must.include = c("mpg", "cyl", "disp", "hp", "drat", 
+                            "wt", "qsec", "vs", "am", "gear", "carb"))
+```
+
+```
+## [1] FALSE
+```
 
 ---
 
@@ -554,7 +581,7 @@ The last Your Turn resulted in...
 .center[![:scale 70%](travis_is_depressing2.png)]
 
 ---
-
+class:middle,center
 # Code Coverage: `covr`
 
 ---
@@ -564,7 +591,7 @@ The last Your Turn resulted in...
 &gt; How many unit tests are enough? Is everything tested?
 
 - `covr` is a package that will:
-    1. build your package in a clean environment 
+    1. build your package in a clean environment (using TravisCI)
     2. run your tests
     3. determine how many times each line was evaluated (through [magic](https://cran.r-project.org/web/packages/covr/vignettes/how_it_works.html))
     4. launch a Shiny app to show you line-by-line coverage reports
