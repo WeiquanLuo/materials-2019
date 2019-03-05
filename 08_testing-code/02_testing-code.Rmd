@@ -532,6 +532,7 @@ Create a new function for your `helloR` package.
 
 3. Does your function pass your tests? How do your tests compare to your neighbor's?
 ???
+
 This time, I want you to take a function description and write the tests and expectations from scratch. Use the same workflow you used in the previous yourturn. Remember to use assertions in your function! They're helpful to generate good error messages - messages that you can test!
 
 ---
@@ -559,6 +560,9 @@ test_that("sign_root works as expected", {
 })
 ```
 
+???
+
+The first two expectations test that passing in a non-numeric value for n and value produces an error. The next four test different combinations of value and sign. There are additional tests we could write, for instance, to test whether the function explicitly returns a numeric value, but by testing the function on a range of inputs and ensuring equivalence with numeric values, we are implicitly testing that the function returns a number. It's your choice whether to make that test explicit or not.
 ---
 
 ## Solution - Function
@@ -577,6 +581,8 @@ sign_root <- function(n = 2, value = 4) {
   abs(value) ^ (1/n) * sign(value)
 }
 ```
+???
+Notice the way we refer to checkmate::check_number - we still need to list it in the DESCRIPTION file as an import, but we don't have to explicitly import the function if we reference it this way. The two condition checks are what throw the errors we are testing for. The rest of the checks are pure math - we're testing functionality under a number of basic conditions.
 
 ---
 
@@ -591,6 +597,8 @@ sign_root <- function(n = 2, value = 4) {
     
 - Independent - don't require outside files (traditionally)
 
+???
+Unit tests are supposed to be run in a clean environment - they shouldn't depend on objects that you have in your environment, unless you write the code to set those objects up and tear them down after the tests are run. Each set of tests should run as a single module, and they should run relatively quickly - try to test a small computation so that the entire test suite runs in under a minute or two at most (remember, these tests run after every package check, and in every travis-ci build, so they're going to run frequently)
 ---
 
 ## Unit tests
@@ -607,7 +615,11 @@ sign_root <- function(n = 2, value = 4) {
 
 - download data from elsewhere with a set-up function, delete it with a tear-down function
     - tests will fail without internet or if the site is down
+???
 
+Some of you may be wondering how we test statistical functions if we are trying to not depend on outside objects, like... data. Where possible, we want to use test data, package data, and other convenient data sets. If you can test your functions with mtcars, by all means, do so. Make it easy and boring. 
+
+In other situations, you need more complicated data types. You can set up functions to download your data and set up your environment, but you need to make sure you clean up those files afterwards by using the tear-down functions; you also need to make sure to skip the tests if internet isn't working (testthat has a way to skip tests on travis or CRAN checks, or if certain conditions are satisfied.)
 
 ---
 
@@ -629,8 +641,11 @@ Unit tests test specific functions you've written. Package checks test the whole
 
 - examples can be run
 
-- and more...
+- all of your tests work correctly
 
+- and more...
+???
+In the package slides, we talked briefly about CRAN and package checks. In addition to running your tests after code changes, `check()` will also run your unit tests to make sure your package is functioning correctly. It will also check for a number of other problems and generally try to make sure your package is correctly set up and specified.
 ---
 
 ## Package Checking
@@ -647,6 +662,8 @@ Workflow:
 
 - Repeat until there are no more problems
 
+???
+The workflow for `check` is pretty simple - run it, fix the first issue, rerun, and repeat until there are no issues. 
 ---
 class:inverse
 ## Your Turn
@@ -660,9 +677,17 @@ Get your package working with `devtools::check()`. You may have to:
 
 - make sure your tests pass
 
+???
+In this your turn, go ahead and make sure your package passes check(). You'll have to make sure your function is documented correctly, add a license, and make sure all of your tests pass.
+
+If you're having trouble, raise your hand and flag one of us down, because it's pretty important to get things working before we go on to the next stage.
+
 ---
 class:middle,center
 # Continuous Integration - TravisCI
+
+???
+The next step in this process is to make it easy to check the package. Running check() can get pretty tedious, so let's set up continuous integration - basically, a system that will check our package every time we push changes to GitHub. 
 
 ---
 
