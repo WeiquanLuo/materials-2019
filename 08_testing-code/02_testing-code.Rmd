@@ -703,6 +703,9 @@ How do you determine if things will work on a different computer?
 
 You test the package build/install process as well!
 
+???
+Instead of forgetting to run things every time we make a change, we're going to set things up automatically. 
+
 ---
 
 ## Continuous Integration
@@ -713,7 +716,8 @@ You test the package build/install process as well!
 3. build your package
 4. run all tests
 5. (optional) calculate code coverage and upload to a service like [codecov.io](https://codecove.io)
-
+???
+The travis workflow is pretty sweet - a small configuration file, and your test environment will be automatically set up, it will install all of your dependencies, build your package, run all of your test, and then calculate code coverage to see how much of your code is covered by your unit tests (we'll get to that in a minute, but it's pretty sweet.)
 ---
 
 ## Continuous Integration
@@ -723,7 +727,8 @@ Setting up Travis for your R package:
 1. [Make an account](https://travis-ci.org/) and link to your GitHub account
 2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
 ![:scale 60%](switch_travis_repo_on.png)
-
+???
+To set up travis, you're going to have to make an account on travis-ci and then link it to your github account. Then, you turn travis monitoring on for the repository of your choice, and you are *almost* good to go. 
 ---
 
 ## Continuous Integration
@@ -735,7 +740,8 @@ Setting up Travis for your R package:
 3. Enable travis for your package: `usethis::use_travis()`
 
 A new build will be triggered when you push changes to your github repository.
-
+???
+On the R side, you just have to run a simple usethis command: `use_travis()`
 ---
 class:inverse
 ## Your Turn
@@ -744,7 +750,8 @@ class:inverse
 
 2. Try to get your travis build working.
 
-
+???
+So go ahead and try it out.
 ---
 
 ## Continuous Integration
@@ -755,7 +762,8 @@ class:inverse
 
 </p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/722514130968535042?ref_src=twsrc%5Etfw">April 19, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
+???
+Travis can be frustrating. When you do actually get it working, though, it feels really awesome.
 ---
 
 ## Continuous Integration
@@ -764,11 +772,15 @@ The last Your Turn resulted in...
 ![](travis_is_depressing.png)
 
 .center[![:scale 70%](travis_is_depressing2.png)]
+???
+This is my email inbox after setting Travis up for my test repository... 
+The Still Failing message hits you right in the feels every time.
 
 ---
 class:middle,center
 # Code Coverage: `covr`
-
+???
+Once you get travis set up, you can set up covr, which is a pretty sweet little package. 
 ---
 
 ## Code Coverage
@@ -793,7 +805,8 @@ covr::report() # Run a local code coverage report
 #   automatically with every change you push to the github repo
 usethis::use_coverage(type = "codecov") 
 ```
-
+???
+Covr is pretty nice because it will tell you (using magic!) exactly which lines were run during your test suite. So if you have an if statement that isn't tested, it will let you know. It'll also tell you how many times a line of code has been run. It's pretty amazing. 
 ---
 class:inverse
 ## Your Turn
