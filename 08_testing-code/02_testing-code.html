@@ -38,7 +38,7 @@ class: center, middle
 
 ???
 
-This set of slides is going to cover a lot of ground - current best practices for testing to make sure your code does what you want it to do, how to automate the test process so that it isn't too tedious, setting your package up to automatically test itself with each new commit, and then how to make sure each line of your package is tested. It's a lot of ground to cover, so bear with me and ask lots of questions.
+This set of slides is going to cover a lot of ground - current best practices for testing to make sure your code does what you want it to do, how to automate the test process so that it isn't too tedious, setting your package up to automatically test itself with each new commit, and then how to make sure each line of your package is tested. It's a lot, and it's pretty easy to get lost in the weeds, so please stop me and ask questions. 
 
 ---
 
@@ -375,13 +375,13 @@ test_data_frame(mtcars,
 ```
 
 ```r
-test_names(mtcars, 
+test_names(names(mtcars), 
            must.include = c("mpg", "cyl", "disp", "hp", "drat", 
                             "wt", "qsec", "vs", "am", "gear", "carb"))
 ```
 
 ```
-## [1] FALSE
+## [1] TRUE
 ```
 
 ???
@@ -721,7 +721,7 @@ The next step in this process is to make it easy to check the package. Running c
 
 The package build - modify - test cycle can be tedious. 
 
-Sometimes, your package is written in a way that depends on your R environment. 
+Sometimes, your package is written in a way that depends on your R environmpent. 
 
 How do you determine if things will work on a different computer?
 
