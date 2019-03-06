@@ -429,11 +429,16 @@ Suppose we want to create a function `mymean` that has parameters x and na.rm. W
 
 --
 
+- return `NA` when x has `NA`s and `na.rm = F`
+
+--
+
 - return a value equal to `sum(x)/length(x)` when x has no `NA` values 
 
-- return a value equal to `sum(x2)/length(x2)` where `x2 = x[!is.na(x)]` if `na.rm = T`
+--
 
-- return `NA` when x has `NA`s and `na.rm = F`
+- return a value equal to `sum(x2)/length(x2)` where    
+`x2 = x[!is.na(x)]` if `na.rm = T`
 
 ---
 
@@ -441,8 +446,9 @@ Suppose we want to create a function `mymean` that has parameters x and na.rm. W
 
 Important behaviors: 
 
-- issue a warning when x is not numeric    
-(or if x cannot be coerced to a numeric vector)
+
+- issue a warning when x is not numeric and return NA
+
 ```{r, eval = F}
 x <- letters[1:3]
 expect_warning(mymean(x)) # This is the minimal test
@@ -459,6 +465,27 @@ expect_warning(
 ???
 Our expectation for non-numeric input is that mymean returns NA and a warning. We could test for a specific warning, or we could test that a warning is issued and leave it at that. Initially, it's probably better to test for the presence of a warning, but as your package matures you may want to check that specific warnings are generated to make sure your function is responding to the right thing.
 We also want to test that mymean returns an NA. Note that this will still generate a warning, so we have to actually wrap the two functions.
+
+---
+
+## Test-Driven Development Example
+
+- return `NA` when x has `NA`s and `na.rm = F`
+```{r, eval = F}
+# Can also test to see if a test fails...
+expect_failure(
+  expect_equal(mymean(c(1:8, NA), na.rm = F), mymean(c(1:8)))
+)
+
+# Or test if something returns NA
+expect_true(is.na(mymean(c(1:8, NA))))
+```
+???
+We can expect a test to fail, which is a bit strange but useful - we want the values to be different in this case. 
+
+Alternately, we can test to see if the function returns NA, which is a more specific test of the behavior we want.
+
+In general, it's best to test for specific behaviors, but there's an art to how specific your tests should be.
 ---
 
 ## Test-Driven Development Example
@@ -479,22 +506,6 @@ expect_equal(mymean(y, na.rm = T), mymean(x))
 ???
 
 We can first test that mymean returns a correct response, and then check that it returns the same response when an NA is added and na.rm is true.
----
-
-## Test-Driven Development Example
-
-- return `NA` when `na.rm = F` and `x` has `NA`s
-```{r, eval = F}
-# Can also test to see if a test fails...
-expect_failure(
-  expect_equal(mymean(c(1:8, NA), na.rm = F), mymean(c(1:8)))
-)
-
-# Or test if something returns NA
-expect_true(is.na(mymean(c(1:8, NA))))
-```
-???
-We can expect a test to fail, which is a bit strange but useful - we want the values to be different in thsi case. Alternately, we can test to see if the function returns NA, which is a more specific test of the behavior we want.
 ---
 class:inverse
 ## Your Turn
@@ -723,24 +734,28 @@ Instead of forgetting to run things every time we make a change, we're going to 
 The travis workflow is pretty sweet - a small configuration file, and your test environment will be automatically set up, it will install all of your dependencies, build your package, run all of your test, and then calculate code coverage to see how much of your code is covered by your unit tests (we'll get to that in a minute, but it's pretty sweet.)
 ---
 
-## Continuous Integration
+## Setting up Travis for your R package:
 
-Setting up Travis for your R package:
+1. [Make an account](https://travis-ci.org/) (sign up with GitHub) 
 
-1. [Make an account](https://travis-ci.org/) and link to your GitHub account
-2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
+2. Accept the Authorization of Travis CI. You’ll be redirected to GitHub.
+
+3. Click the green Activate button, and select the [repositories you want to use with Travis CI](https://travis-ci.org/account/repositories)
+
 ![:scale 60%](switch_travis_repo_on.png)
 ???
 To set up travis, you're going to have to make an account on travis-ci and then link it to your github account. Then, you turn travis monitoring on for the repository of your choice, and you are *almost* good to go. 
 ---
 
-## Continuous Integration
+## Setting up Travis for your R package:
 
-Setting up Travis for your R package:
+1. [Make an account](https://travis-ci.org/) (sign up with GitHub) 
 
-1. [Make an account](https://travis-ci.org/) and link to your GitHub account
-2. Switch Travis monitoring on [for the repository of your choice](https://travis-ci.org/account/repositories)
-3. Enable travis for your package: `usethis::use_travis()`
+2. Accept the Authorization of Travis CI. You’ll be redirected to GitHub.
+
+3. Click the green Activate button, and select the [repositories you want to use with Travis CI](https://travis-ci.org/account/repositories)
+
+4. Enable travis for your package: `usethis::use_travis()`
 
 A new build will be triggered when you push changes to your github repository.
 ???
