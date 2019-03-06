@@ -48,7 +48,7 @@ class: inverse
 
 The `usethis` package allows you to directly connect a project to git and github
 
-1. Check with `use_git_config()` that your user name and email are correct for qorking with github
+1. Check with `use_git_config()` that your user name and email are correct for working with github
 
 2. Use `edit_git_config` is they are not correct and fix the information in the file
 
