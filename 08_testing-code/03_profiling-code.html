@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stat 585 - How do we write good code?</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="tweaks.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - How do we write good code?
+### Heike Hofmann
+
+---
+
+
+
+
+## Signs of inexperienced programmers
+
+
+- Violation of the language model
+    - e.g. R is vector oriented language, i.e.  ```for``` loops should be used sparingly, 
+    - e.g. use of ```rbind``` (it is *known* to be very slow)
+
+- Insufficient knowledge of the language. We're all guilty of that at different levels 
+
+- Reading other people's code helps improve our language knowledge!
+
+---
+
+## Removing for loops
+
+`x` is vector with numbers 1,2,3,4
+
+Objective: re-code these into weather events: "Sun", "Rain", "Snow", "Hail"
+
+
+```r
+x &lt;- sample.int(4, size=100, replace = TRUE)
+y &lt;- vector("character", length=length(x))
+for (i in 1:length(x)) {
+   y[i] &lt;- switch (x[i], "Sun", "Rain", "Snow", "Hail", default=NA)
+}
+
+table(y)
+```
+
+```
+## y
+## Hail Rain Snow  Sun 
+##   24   25   23   28
+```
+
+---
+
+## Removing for loops (cont'd)
+
+
+```r
+# the switch statement on the previous slide is equivalent to 
+# the following lines:
+for (i in 1:length(x)) {
+  if (x[i] == 1) y[i] &lt;- "Sun"
+  if (x[i] == 2) y[i] &lt;- "Rain"
+  if (x[i] == 3) y[i] &lt;- "Snow"
+  if (x[i] == 4) y[i] &lt;- "Hail"
+}
+
+# using R's vector system we can reduce this to a single line:
+y &lt;- c("Sun", "Rain", "Snow", "Hail")[x]
+```
+
+---
+
+## Removing for loops (cont'd)
+
+All of the previous solutions doctor around symptoms
+
+We are still breaking the language model :)
+
+--
+
+
+```r
+y &lt;- factor(x, labels =  c("Sun", "Rain", "Snow", "Hail"))
+
+summary(y)
+```
+
+```
+##  Sun Rain Snow Hail 
+##   28   25   23   24
+```
+
+---
+
+## Spotting bad code
+
+- **Ken Thompson:** &lt;br&gt; keep the number of indentations down, high number of local variables is suspicious
+
+- **Hadley Wickham:** &lt;br&gt; functions with more than ten lines are suspicious, as is highly repetitive code
+
+- **Generally Good Practices:** &lt;br&gt; structure code using indentation and spacing, write comments, use clear naming convention
+
+---
+
+## Profiling
+
+Code can be profiled at different levels:
+
+1. two (or more) alternatives of code with the same objectives are timed to determined the one which is the fastest (`system.time()` and `proc.time()`)
+
+2. one piece of code is analyzed to find weak/slow spots (e.g. `profvis` )
+
+---
+
+## Profiling process
+
+- Collect information on code performance:
+
+- memory usage
+
+- frequency and duration of function calls
+
+- Goal: optimization of code
+
+---
+
+## `system.time()` or `proc.time()`
+
+- Probably simplest of all measures
+
+- Evaluates the time spent in the whole expression
+
+- doesn't give any clues about what is done at a lower level &lt;br&gt;&lt;br&gt;
+
+
+---
+
+## (Mini) code blocks
+
+
+
+```r
+ptm &lt;- proc.time()
+t1 &lt;- read.csv("../data/temps.csv")
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##   2.002   0.093   2.206
+```
+
+```r
+ptm &lt;- proc.time()
+t2 &lt;- readr::read_csv("../data/temps.csv", progress = FALSE)
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##   0.699   0.042   0.808
+```
+
+---
+
+## (Mini) code blocks
+
+
+```r
+ptm &lt;- proc.time()
+t3 &lt;- readRDS("../data/temps.rds")
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##   0.068   0.008   0.089
+```
+
+```r
+ptm &lt;- proc.time()
+load("../data/temps.Rda")
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##   0.066   0.008   0.080
+```
+
+
+---
+class: inverse
+## Your turn: which option is fastest?
+
+
+```r
+x &lt;- sample.int(4, 100, replace=TRUE)
+y &lt;- vector("character", length=length(x))
+
+# Option #1
+for (i in 1:length(x)) {
+   y[i] &lt;- switch (x[i], "Sun", "Rain", "Snow", "Hail", default=NA)
+}
+
+# Option #2
+for (i in 1:length(x)) {
+  if (x[i] == 1) y[i] &lt;- "Sun"
+  if (x[i] == 2) y[i] &lt;- "Rain"
+  if (x[i] == 3) y[i] &lt;- "Snow"
+  if (x[i] == 4) y[i] &lt;- "Hail"
+}
+
+# Option #3
+y &lt;- c("Sun", "Rain", "Snow", "Hail")[x]
+
+# Option #4
+y &lt;- factor(x)
+levels(y) &lt;- c("Sun", "Rain", "Snow", "Hail")
+```
+---
+
+## Your Turn Result
+
+Based on 500 evaluations of samples of size 5000: 
+
+![](03_profiling-code_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+---
+
+## Profiling Code
+
+Option 3 is  fastest on average. But why?
+
+`profvis` package:
+
+- wrapper around function `Rprof`
+
+- call stack is written every 0.02 seconds (interval) into a temporary file
+
+- output file is processed to produce a summary of the usage
+
+- time measurements varies by platform: on Unix-alike time is CPU time of the R process (excludes time waiting for input)
+
+- Note: profiling takes time, too; once the timer goes off, the information is not recorded until the next timing click (probably in the range 1–10 msecs). Can’t go below that.
+
+
+---
+
+## `profvis` example
+
+
+```r
+library(profvis)
+
+p &lt;- profvis({			
+  data(diamonds, package = "ggplot2")			
+  plot(price ~ carat, data = diamonds)			
+  m &lt;- lm(price ~ carat, data = diamonds)			
+  abline(m, col = "red")			
+})
+```
+
+`profvis` creates interactive response with code and flame plot.
+
+Copy and paste the code into your console to run it.
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
