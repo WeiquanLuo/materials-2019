@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stat 585 - Web Scraping</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann and Susan Vanderplas" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="tweaks.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - Web Scraping
+### Heike Hofmann and Susan Vanderplas
+
+---
+
+
+
+
+
+## Web Scraping 
+
+- Transform data from web pages into usable information
+
+- Automate the process
+
+![](http://webdata-scraping.com/media/2015/01/Web-Scraping-Process.png)
+
+---
+
+## `rvest` + `xml2`: Easy Web Scraping
+  
+- `read_html` gets the full set of HTML markup from a URL
+
+
+```r
+library(rvest)
+url &lt;- "http://www.nytimes.com/elections/results/iowa"
+html &lt;- read_html(url)
+html
+```
+
+```
+## {xml_document}
+## &lt;html lang="en" itemscope="" xmlns:og="//opengraphprotocol.org/schema/" itemtype="//schema.org/NewsArticle"&gt;
+## [1] &lt;head&gt;\n&lt;title&gt;Iowa Election Results 2016 – The New Y ...
+## [2] &lt;body class="eln-general-state-results eln-state-iowa ...
+```
+
+- Use `html_attr`, `html_node`, `html_table`, and `html_text` to extract useful information from the markup
+
+---
+
+## Get a *table* from an online source
+
+`html_table` extracts all tables from the sourced html into a list of data frames:
+  
+
+```r
+tables &lt;- html %&gt;% html_table(fill=TRUE)
+tables %&gt;% purrr::map(glimpse)
+```
+
+```
+## Observations: 11
+## Variables: 7
+## $ Candidate &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Candidate &lt;chr&gt; "Trump\n            \n            \n   …
+## $ Party     &lt;chr&gt; "Republican\n          Rep.", "Democrat…
+## $ Votes     &lt;chr&gt; "800,983", "653,669", "59,186", "19,992…
+## $ Pct.      &lt;chr&gt; "51.1%", "41.7%", "3.8%", "1.3%", "0.8%…
+## $ ``        &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ E.V.      &lt;chr&gt; "6", "—", "—", "—", "—", "—", "—", "—",…
+## Observations: 100
+## Variables: 3
+## $ `Vote by county` &lt;chr&gt; "Polk", "Linn", "Scott", "Johnso…
+## $ Trump            &lt;chr&gt; "93,492", "48,390", "39,149", "2…
+## $ Clinton          &lt;chr&gt; "119,804", "58,935", "40,440", "…
+## Observations: 6
+## Variables: 6
+## $ Candidate &lt;lgl&gt; NA, NA, NA, NA, NA, NA
+## $ Candidate &lt;chr&gt; "Grassley*\n            \n            \…
+## $ Party     &lt;chr&gt; "Republican\n          Rep.", "Democrat…
+## $ Votes     &lt;chr&gt; "926,007", "549,460", "41,794", "17,649…
+## $ Pct.      &lt;chr&gt; "60.2%", "35.7%", "2.7%", "1.1%", "0.3%…
+## $ ``        &lt;lgl&gt; NA, NA, NA, NA, NA, NA
+## Observations: 100
+## Variables: 3
+## $ `Vote by county` &lt;chr&gt; "Polk", "Linn", "Scott", "Johnso…
+## $ Grassley         &lt;chr&gt; "118,164", "62,737", "46,415", "…
+## $ Judge            &lt;chr&gt; "100,317", "47,635", "34,503", "…
+## Observations: 4
+## Variables: 5
+## $ `District\n          Dist.` &lt;int&gt; 1, 2, 3, 4
+## $ Leader                      &lt;chr&gt; "54%Blum*\n      Rep.…
+## $ ``                          &lt;chr&gt; "46%Vernon\n      Dem…
+## $ Rpt.                        &lt;chr&gt; "100%", "100%", "100%…
+## $ ``                          &lt;lgl&gt; NA, NA, NA, NA
+## Observations: 25
+## Variables: 5
+## $ `Seat\n          Seat` &lt;int&gt; 2, 4, 6, 8, 10, 12, 14, 16…
+## $ Leader                 &lt;chr&gt; "0%Feenstra*\n      Rep.",…
+## $ ``                     &lt;chr&gt; "Uncontested", "39%Bangert…
+## $ Rpt.                   &lt;chr&gt; "", "100%", "100%", "100%"…
+## $ ``                     &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA…
+## Observations: 100
+## Variables: 5
+## $ `District\n          Dist.` &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, …
+## $ Leader                      &lt;chr&gt; "0%Wills*\n      Rep.…
+## $ ``                          &lt;chr&gt; "Uncontested", "Uncon…
+## $ Rpt.                        &lt;chr&gt; "", "", "100%", "100%…
+## $ ``                          &lt;lgl&gt; NA, NA, NA, NA, NA, N…
+## Observations: 3
+## Variables: 5
+## $ Question &lt;chr&gt; "Retain Brent Appel", "Retain Daryl Hech…
+## $ Yes      &lt;chr&gt; "64%Yes", "64%Yes", "65%Yes"
+## $ No       &lt;chr&gt; "36%No", "36%No", "35%No"
+## $ Rpt.     &lt;chr&gt; "100%", "100%", "100%"
+## $ ``       &lt;lgl&gt; NA, NA, NA
+```
+
+```
+## [[1]]
+##    Candidate
+## 1         NA
+## 2         NA
+## 3         NA
+## 4         NA
+## 5         NA
+## 6         NA
+## 7         NA
+## 8         NA
+## 9         NA
+## 10        NA
+## 11        NA
+##                                                                     Candidate
+## 1            Trump\n            \n            \n              Donald J. Trump
+## 2          Clinton\n            \n            \n              Hillary Clinton
+## 3             Johnson\n            \n            \n              Gary Johnson
+## 4                    Others\n            \n            \n              Others
+## 5           McMullin\n            \n            \n              Evan McMullin
+## 6                 Stein\n            \n            \n              Jill Stein
+## 7            Castle\n            \n            \n              Darrell Castle
+## 8                Kahn\n            \n            \n              Lynn S. Kahn
+## 9  De La Fuente\n            \n            \n              Rocky De La Fuente
+## 10          La Riva\n            \n            \n              Gloria La Riva
+## 11                   Others\n            \n            \n              Others
+##                             Party   Votes  Pct.    E.V.
+## 1      Republican\n          Rep. 800,983 51.1% NA    6
+## 2        Democrat\n          Dem. 653,669 41.7% NA    —
+## 3     Libertarian\n          Lib.  59,186  3.8% NA    —
+## 4     Independent\n          Ind.  19,992  1.3% NA    —
+## 5           Petitioning Candidate  12,366  0.8% NA    —
+## 6          Green\n          Green  11,479  0.7% NA    —
+## 7  Constitution\n          Const.   5,335  0.3% NA    —
+## 8     Independent\n          Ind.   2,247  0.1% NA    —
+## 9           Petitioning Candidate     451  0.0% NA    —
+## 10       P.S.L.\n          P.S.L.     323  0.0% NA    —
+## 11                                 32,201  2.1% NA    —
+## 
+## [[2]]
+##     Vote by county  Trump Clinton
+## 1             Polk 93,492 119,804
+## 2             Linn 48,390  58,935
+## 3            Scott 39,149  40,440
+## 4          Johnson 21,044  50,200
+## 5       Black Hawk 27,476  32,233
+## 6            Story 19,458  25,709
+## 7          Dubuque 23,460  22,850
+## 8         Woodbury 24,727  16,210
+## 9    Pottawattamie 24,447  15,355
+## 10          Dallas 19,339  15,701
+## 11          Warren 14,814  10,411
+## 12         Clinton 11,276  10,095
+## 13     Cerro Gordo 11,621   9,862
+## 14       Muscatine  9,584   8,368
+## 15      Des Moines  9,529   8,212
+## 16          Jasper 10,560   7,109
+## 17           Sioux 14,785   2,300
+## 18        Marshall  9,146   7,652
+## 19          Marion 10,962   5,482
+## 20         Webster 10,056   6,305
+## 21             Lee  8,803   6,215
+## 22         Wapello  8,715   5,594
+## 23           Boone  7,484   5,541
+## 24          Benton  8,232   4,678
+## 25          Bremer  7,208   5,356
+## 26        Plymouth  9,680   2,885
+## 27      Winneshiek  5,344   5,254
+## 28      Washington  6,173   3,943
+## 29         Mahaska  7,432   2,619
+## 30         Carroll  6,638   3,309
+## 31       Dickinson  6,753   3,056
+## 32         Jackson  5,824   3,837
+## 33        Buchanan  5,510   3,970
+## 34           Jones  5,720   3,787
+## 35         Fayette  5,620   3,689
+## 36       Poweshiek  4,946   4,304
+## 37           Cedar  5,295   3,599
+## 38           Henry  5,779   2,904
+## 39        Delaware  5,694   2,957
+## 40         Clayton  5,317   3,237
+## 41            Iowa  5,205   3,084
+## 42            Tama  4,971   3,196
+## 43         Madison  5,360   2,678
+## 44            Clay  5,877   2,249
+## 45         Kossuth  5,653   2,543
+## 46          Hardin  5,254   2,787
+## 47     Buena Vista  4,903   2,856
+## 48       Jefferson  3,748   3,710
+## 49           Floyd  4,375   3,179
+## 50           Mills  5,067   2,090
+## 51        Hamilton  4,463   2,726
+## 52          Butler  4,921   2,157
+## 53        Harrison  4,902   2,131
+## 54         O'Brien  5,752   1,315
+## 55            Cass  4,761   1,951
+## 56            Page  4,893   1,807
+## 57        Crawford  4,617   1,991
+## 58       Allamakee  4,093   2,421
+## 59          Grundy  4,527   1,856
+## 60       Chickasaw  3,742   2,266
+## 61            Lyon  5,192     920
+## 62          Shelby  4,362   1,662
+## 63        Cherokee  4,192   1,679
+## 64       Appanoose  4,033   1,814
+## 65          Wright  3,800   1,896
+## 66         Hancock  3,977   1,587
+## 67           Union  3,525   1,922
+## 68       Winnebago  3,447   1,931
+## 69         Guthrie  3,628   1,732
+## 70        Mitchell  3,190   1,888
+## 71             Sac  3,703   1,270
+## 72         Calhoun  3,468   1,398
+## 73        Humboldt  3,568   1,252
+## 74      Montgomery  3,436   1,314
+## 75          Louisa  3,069   1,648
+## 76          Keokuk  3,390   1,342
+## 77        Franklin  3,163   1,493
+## 78          Greene  2,820   1,691
+## 79           Emmet  3,124   1,357
+## 80       Palo Alto  3,081   1,398
+## 81          Monona  3,120   1,247
+## 82          Howard  2,611   1,677
+## 83          Clarke  2,713   1,465
+## 84           Lucas  2,877   1,239
+## 85           Worth  2,453   1,530
+## 86           Davis  2,723     977
+## 87          Monroe  2,638   1,056
+## 88      Pocahontas  2,702     963
+## 89           Adair  2,461   1,133
+## 90         Decatur  2,296   1,201
+## 91             Ida  2,655     792
+## 92         Fremont  2,407     963
+## 93       Van Buren  2,527     845
+## 94         Audubon  2,136   1,080
+## 95         Osceola  2,531     552
+## 96          Taylor  2,111     758
+## 97           Wayne  2,069     719
+## 98        Ringgold  1,824     753
+## 99           Adams  1,395     565
+## 100           &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+## 
+## [[3]]
+##   Candidate
+## 1        NA
+## 2        NA
+## 3        NA
+## 4        NA
+## 5        NA
+## 6        NA
+##                                                                      Candidate
+## 1    Grassley*\n            \n            \n              Charles E. Grassley*
+## 2                 Judge\n            \n            \n              Patty Judge
+## 3           Aldrich\n            \n            \n              Charles Aldrich
+## 4             Hennager\n            \n            \n              Jim Hennager
+## 5 Luick-Thrams\n            \n            \n              Michael Luick-Thrams
+## 6                     Others\n            \n            \n              Others
+##                         Party   Votes  Pct.   
+## 1  Republican\n          Rep. 926,007 60.2% NA
+## 2    Democrat\n          Dem. 549,460 35.7% NA
+## 3 Libertarian\n          Lib.  41,794  2.7% NA
+## 4 Independent\n          Ind.  17,649  1.1% NA
+## 5       Petitioning Candidate   4,441  0.3% NA
+## 6                              22,090  1.4% NA
+## 
+## [[4]]
+##     Vote by county Grassley   Judge
+## 1             Polk  118,164 100,317
+## 2             Linn   62,737  47,635
+## 3            Scott   46,415  34,503
+## 4          Johnson   28,914  42,699
+## 5       Black Hawk   33,884  27,245
+## 6            Story   25,475  21,472
+## 7          Dubuque   27,348  19,291
+## 8         Woodbury   27,166  13,909
+## 9    Pottawattamie   25,721  12,943
+## 10          Dallas   24,374  11,876
+## 11          Warren   17,081   8,700
+## 12         Clinton   12,821   8,852
+## 13     Cerro Gordo   13,417   8,173
+## 14       Muscatine   11,157   6,963
+## 15          Jasper   11,688   6,170
+## 16      Des Moines   10,353   7,589
+## 17           Sioux   15,902   1,709
+## 18        Marshall   10,432   6,585
+## 19          Marion   12,407   4,562
+## 20         Webster   11,045   5,396
+## 21             Lee    8,441   6,382
+## 22         Wapello    8,692   5,365
+## 23           Boone    8,593   4,820
+## 24          Benton    9,351   3,811
+## 25          Bremer    8,583   4,357
+## 26        Plymouth   10,338   2,300
+## 27      Winneshiek    6,349   4,436
+## 28      Washington    7,251   3,062
+## 29         Mahaska    7,812   2,302
+## 30         Carroll    7,259   2,714
+## 31       Dickinson    7,489   2,421
+## 32        Buchanan    6,382   3,313
+## 33           Jones    6,551   3,063
+## 34         Jackson    6,283   3,450
+## 35         Fayette    6,412   3,069
+## 36       Poweshiek    5,617   3,748
+## 37           Cedar    6,103   2,908
+## 38           Henry    6,294   2,535
+## 39        Delaware    6,445   2,369
+## 40         Clayton    5,851   2,779
+## 41            Iowa    6,062   2,443
+## 42            Tama    5,536   2,769
+## 43         Kossuth    6,027   2,247
+## 44         Madison    5,921   2,205
+## 45            Clay    6,260   1,894
+## 46          Hardin    5,841   2,284
+## 47     Buena Vista    5,369   2,382
+## 48           Floyd    4,947   2,725
+## 49       Jefferson    4,094   3,447
+## 50        Hamilton    5,142   2,170
+## 51          Butler    5,433   1,782
+## 52           Mills    5,290   1,740
+## 53         O'Brien    6,076   1,060
+## 54        Harrison    5,108   1,788
+## 55            Cass    5,081   1,558
+## 56            Page    5,208   1,461
+## 57          Grundy    5,261   1,370
+## 58       Allamakee    4,473   2,099
+## 59        Crawford    4,674   1,771
+## 60       Chickasaw    4,177   1,956
+## 61            Lyon    5,328     761
+## 62        Cherokee    4,670   1,331
+## 63          Shelby    4,480   1,409
+## 64       Appanoose    4,122   1,690
+## 65          Wright    4,208   1,550
+## 66         Hancock    4,232   1,324
+## 67           Union    3,913   1,625
+## 68       Winnebago    3,938   1,590
+## 69         Guthrie    4,004   1,413
+## 70        Mitchell    3,680   1,536
+## 71             Sac    3,965   1,015
+## 72         Calhoun    3,798   1,154
+## 73        Humboldt    3,860     999
+## 74      Montgomery    3,646   1,067
+## 75        Franklin    3,550   1,172
+## 76          Louisa    3,303   1,429
+## 77          Keokuk    3,697   1,045
+## 78          Greene    3,197   1,344
+## 79           Emmet    3,341   1,171
+## 80       Palo Alto    3,377   1,109
+## 81          Monona    3,315   1,049
+## 82          Howard    2,859   1,459
+## 83          Clarke    2,903   1,273
+## 84           Lucas    3,064   1,068
+## 85           Worth    2,774   1,246
+## 86           Davis    2,750     972
+## 87          Monroe    2,458   1,280
+## 88      Pocahontas    2,891     784
+## 89           Adair    2,708     894
+## 90         Decatur    2,488   1,037
+## 91             Ida    2,868     590
+## 92       Van Buren    2,618     764
+## 93         Fremont    2,582     735
+## 94         Audubon    2,323     847
+## 95         Osceola    2,601     455
+## 96          Taylor    2,220     613
+## 97           Wayne    2,195     645
+## 98        Ringgold    1,989     617
+## 99           Adams    1,515     454
+## 100           &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;
+## 
+## [[5]]
+##   District\n          Dist.                   Leader
+## 1                         1     54%Blum*\n      Rep.
+## 2                         2 54%Loebsack*\n      Dem.
+## 3                         3    54%Young*\n      Rep.
+## 4                         4     61%King*\n      Rep.
+##                         Rpt.   
+## 1 46%Vernon\n      Dem. 100% NA
+## 2 46%Peters\n      Rep. 100% NA
+## 3 40%Mowrer\n      Dem. 100% NA
+## 4 39%Weaver\n      Dem. 100% NA
+## 
+## [[6]]
+##    Seat\n          Seat                    Leader
+## 1                     2   0%Feenstra*\n      Rep.
+## 2                     4      61%Guth*\n      Rep.
+## 3                     6  83%Segebart*\n      Rep.
+## 4                     8     54%Dawson\n      Rep.
+## 5                    10   67%Chapman*\n      Rep.
+## 6                    12  78%Costello*\n      Rep.
+## 7                    14  74%Sinclair*\n      Rep.
+## 8                    16    60%Boulton\n      Dem.
+## 9                    18   0%Petersen*\n      Dem.
+## 10                   20      60%Zaun*\n      Rep.
+## 11                   22 56%Schneider*\n      Rep.
+## 12                   24      64%Behn*\n      Rep.
+## 13                   26      62%Brown\n      Rep.
+## 14                   28 58%Breitbach*\n      Rep.
+## 15                   30 59%Danielson*\n      Dem.
+## 16                   32    60%Johnson\n      Rep.
+## 17                   34    56%Mathis*\n      Dem.
+## 18                   36      53%Edler\n      Rep.
+## 19                   38  60%Kapucian*\n      Rep.
+## 20                   40  0%Rozenboom*\n      Rep.
+## 21                   42    50%Taylor*\n      Dem.
+## 22                   44     53%Greene\n      Rep.
+## 23                   46    57%Lofgren\n      Rep.
+## 24                   48   63%Zumbach*\n      Rep.
+## 25                   50    63%Jochum*\n      Dem.
+##                               Rpt.   
+## 1                 Uncontested      NA
+## 2      39%Bangert\n      Dem. 100% NA
+## 3     17%Serianni\n      Lib. 100% NA
+## 4    46%Gronstal*\n      Dem. 100% NA
+## 5     33%Paladino\n      Dem. 100% NA
+## 6       22%Brantz\n      Lib. 100% NA
+## 7        26%Smith\n      Ind. 100% NA
+## 8        35%Pryor\n      Rep. 100% NA
+## 9                 Uncontested      NA
+## 10      41%Hikiji\n      Dem. 100% NA
+## 11      44%Barnes\n      Dem. 100% NA
+## 12   36%Puntenney\n      Dem.  98% NA
+## 13    38%Wilhelm*\n      Dem. 100% NA
+## 14      36%Heikes\n      Dem. 100% NA
+## 15      41%Sadler\n      Rep. 100% NA
+## 16 40%Schoenjahn*\n      Dem. 100% NA
+## 17     44%Gadelha\n      Rep. 100% NA
+## 18    47%Sodders*\n      Dem. 100% NA
+## 19     34%Mathahs\n      Dem. 100% NA
+## 20                Uncontested      NA
+## 21      50%Graber\n      Rep.  97% NA
+## 22   47%Courtney*\n      Dem. 100% NA
+## 23      43%Brase*\n      Dem. 100% NA
+## 24    33%Peterson\n      Dem. 100% NA
+## 25    37%Hulsizer\n      Rep.  96% NA
+## 
+## [[7]]
+##     District\n          Dist.
+## 1                           1
+## 2                           2
+## 3                           3
+## 4                           4
+## 5                           5
+## 6                           6
+## 7                           7
+## 8                           8
+## 9                           9
+## 10                         10
+## 11                         11
+## 12                         12
+## 13                         13
+## 14                         14
+## 15                         15
+## 16                         16
+## 17                         17
+## 18                         18
+## 19                         19
+## 20                         20
+## 21                         21
+## 22                         22
+## 23                         23
+## 24                         24
+## 25                         25
+## 26                         26
+## 27                         27
+## 28                         28
+## 29                         29
+## 30                         30
+## 31                         31
+## 32                         32
+## 33                         33
+## 34                         34
+## 35                         35
+## 36                         36
+## 37                         37
+## 38                         38
+## 39                         39
+## 40                         40
+## 41                         41
+## 42                         42
+## 43                         43
+## 44                         44
+## 45                         45
+## 46                         46
+## 47                         47
+## 48                         48
+## 49                         49
+## 50                         50
+## 51                         51
+## 52                         52
+## 53                         53
+## 54                         54
+## 55                         55
+## 56                         56
+## 57                         57
+## 58                         58
+## 59                         59
+## 60                         60
+## 61                         61
+## 62                         62
+## 63                         63
+## 64                         64
+## 65                         65
+## 66                         66
+## 67                         67
+## 68                         68
+## 69                         69
+## 70                         70
+## 71                         71
+## 72                         72
+## 73                         73
+## 74                         74
+## 75                         75
+## 76                         76
+## 77                         77
+## 78                         78
+## 79                         79
+## 80                         80
+## 81                         81
+## 82                         82
+## 83                         83
+## 84                         84
+## 85                         85
+## 86                         86
+## 87                         87
+## 88                         88
+## 89                         89
+## 90                         90
+## 91                         91
+## 92                         92
+## 93                         93
+## 94                         94
+## 95                         95
+## 96                         96
+## 97                         97
+## 98                         98
+## 99                         99
+## 100                       100
+##                                Leader
+## 1                0%Wills*\n      Rep.
+## 2                0%Jones*\n      Rep.
+## 3             81%Huseman*\n      Rep.
+## 4              63%Wheeler\n      Rep.
+## 5                77%Holz*\n      Rep.
+## 6               66%Carlin\n      Rep.
+## 7             63%Gassman*\n      Rep.
+## 8              68%Baxter*\n      Rep.
+## 9              57%Miller*\n      Dem.
+## 10              0%Sexton*\n      Rep.
+## 11            65%Worthan*\n      Rep.
+## 12               70%Best*\n      Rep.
+## 13               62%Hall*\n      Dem.
+## 14              51%Kacena\n      Dem.
+## 15           52%McConkey*\n      Dem.
+## 16             57%Hanusa*\n      Rep.
+## 17         74%Windschitl*\n      Rep.
+## 18                0%Holt*\n      Rep.
+## 19              61%Watts*\n      Rep.
+## 20            53%Baudler*\n      Rep.
+## 21               0%Moore*\n      Rep.
+## 22          0%Forristall*\n      Rep.
+## 23              71%Sieck*\n      Rep.
+## 24           0%Dolecheck*\n      Rep.
+## 25          66%Gustafson*\n      Rep.
+## 26              54%Ourth*\n      Dem.
+## 27                71%Fry*\n      Rep.
+## 28          65%Heartsill*\n      Rep.
+## 29        51%Breckenridge\n      Dem.
+## 30               62%Nunn*\n      Rep.
+## 31              55%Olson*\n      Dem.
+## 32             68%Gaines*\n      Dem.
+## 33              77%Meyer*\n      Dem.
+## 34              0%Hunter*\n      Dem.
+## 35        76%Abdul-Samad*\n      Dem.
+## 36           64%Anderson*\n      Dem.
+## 37             57%Landon*\n      Rep.
+## 38            52%Koester*\n      Rep.
+## 39           57%Highfill*\n      Rep.
+## 40             57%Forbes*\n      Dem.
+## 41              0%Oldson*\n      Dem.
+## 42             53%Cownie*\n      Rep.
+## 43            52%Hagenow*\n      Rep.
+## 44              0%Taylor*\n      Rep.
+## 45  56%Wessel-Kroeschell*\n      Dem.
+## 46             0%Heddens*\n      Dem.
+## 47          61%Baltimore*\n      Rep.
+## 48              65%Bacon*\n      Rep.
+## 49              60%Deyoe*\n      Rep.
+## 50           75%Grassley*\n      Rep.
+## 51        63%Bloomingdale\n      Rep.
+## 52           54%Prichard*\n      Dem.
+## 53           61%Steckman*\n      Dem.
+## 54             0%Upmeyer*\n      Rep.
+## 55              57%Bergan\n      Rep.
+## 56               67%Hager\n      Rep.
+## 57            52%Lundgren\n      Rep.
+## 58              59%McKean\n      Rep.
+## 59            54%Kressig*\n      Dem.
+## 60             58%Rogers*\n      Rep.
+## 61        0%Brown-Powers*\n      Dem.
+## 62               63%Smith\n      Dem.
+## 63             60%Salmon*\n      Rep.
+## 64          58%Bearinger*\n      Dem.
+## 65            67%Bennett*\n      Dem.
+## 66               0%Staed*\n      Dem.
+## 67              63%Hinson\n      Rep.
+## 68              54%Rizer*\n      Rep.
+## 69   0%Running-Marquardt*\n      Dem.
+## 70             57%Taylor*\n      Dem.
+## 71               0%Smith*\n      Dem.
+## 72             62%Fisher*\n      Rep.
+## 73            0%Kaufmann*\n      Rep.
+## 74              0%Jacoby*\n      Dem.
+## 75         68%Pettengill*\n      Rep.
+## 76            62%Maxwell*\n      Rep.
+## 77             58%Nielsen\n      Dem.
+## 78              78%Klein*\n      Rep.
+## 79       0%Vander Linden*\n      Rep.
+## 80             61%Sheets*\n      Rep.
+## 81             0%Gaskill*\n      Dem.
+## 82              0%Hanson*\n      Dem.
+## 83              0%Kearns*\n      Dem.
+## 84             70%Heaton*\n      Rep.
+## 85             0%Lensing*\n      Dem.
+## 86             0%Mascher*\n      Dem.
+## 87              0%Cohoon*\n      Dem.
+## 88                61%Kerr\n      Rep.
+## 89               0%Lykam*\n      Dem.
+## 90            0%Winckler*\n      Dem.
+## 91            54%Carlson*\n      Rep.
+## 92           56%Paustian*\n      Rep.
+## 93              52%Thede*\n      Dem.
+## 94                 0%Mohr\n      Rep.
+## 95             58%Zumbach\n      Rep.
+## 96               65%Hein*\n      Rep.
+## 97            56%Mommsen*\n      Rep.
+## 98              67%Wolfe*\n      Dem.
+## 99          0%Finkenauer*\n      Dem.
+## 100           0%Isenhart*\n      Dem.
+##                                   Rpt.   
+## 1                     Uncontested      NA
+## 2                     Uncontested      NA
+## 3            19%McCoy\n      Dem. 100% NA
+## 4                  37%VanDerWerff 100% NA
+## 5             23%Ritz\n      Dem. 100% NA
+## 6    35%Alarcon-Flory\n      Dem. 100% NA
+## 7         37%Grussing\n      Dem. 100% NA
+## 8   32%Paule Huisinga\n      Dem. 100% NA
+## 9         43%Waechter\n      Rep. 100% NA
+## 10                    Uncontested      NA
+## 11      35%Huddleston\n      Dem. 100% NA
+## 12           30%Myers\n      Dem. 100% NA
+## 13        39%Broyhill\n      Rep. 100% NA
+## 14       49%Henderson\n      Rep. 100% NA
+## 15           48%Riley\n      Rep. 100% NA
+## 16          43%Gorman\n      Dem. 100% NA
+## 17        27%Creasman\n      Dem. 100% NA
+## 18                    Uncontested      NA
+## 19           39%Smith\n      Dem. 100% NA
+## 20           29%Heldt\n      Dem. 100% NA
+## 21                    Uncontested      NA
+## 22                    Uncontested      NA
+## 23         29%Florian\n      Dem. 100% NA
+## 24                    Uncontested      NA
+## 25          34%Knight\n      Dem. 100% NA
+## 26       46%Snodgrass\n      Rep. 100% NA
+## 27          29%Higdon\n      Dem. 100% NA
+## 28           35%Duffy\n      Dem. 100% NA
+## 29          38%Payton\n      Rep. 100% NA
+## 30          38%Riding\n      Dem. 100% NA
+## 31  39%Christoffersen\n      Rep. 100% NA
+## 32        28%Charlier\n      Rep. 100% NA
+## 33       23%Tomlinson\n      Lib. 100% NA
+## 34                    Uncontested      NA
+## 35             24%Fry\n      Lib. 100% NA
+## 36          36%Miller\n      Rep. 100% NA
+## 37        43%Phillips\n      Dem. 100% NA
+## 38          43%Matson\n      Dem. 100% NA
+## 39          43%Morris\n      Dem. 100% NA
+## 40            43%Reed\n      Rep. 100% NA
+## 41                    Uncontested      NA
+## 42           47%Celsi\n      Dem. 100% NA
+## 43         48%Konfrst\n      Dem. 100% NA
+## 44                    Uncontested      NA
+## 45    36%Childs-Smith\n      Rep. 100% NA
+## 46                    Uncontested      NA
+## 47          40%Duncan\n      Dem. 100% NA
+## 48            35%Taha\n      Dem.  96% NA
+## 49        28%Franklin\n      Dem. 100% NA
+## 50           25%Fritz\n      Dem. 100% NA
+## 51          38%Hejhal\n      Dem. 100% NA
+## 52          46%Stokes\n      Rep. 100% NA
+## 53         40%Hovland\n      Rep. 100% NA
+## 54                    Uncontested      NA
+## 55          43%Ritter\n      Dem. 100% NA
+## 56           33%Ruff*\n      Dem. 100% NA
+## 57         48%Stecher\n      Dem. 100% NA
+## 58            41%Kean\n      Dem. 100% NA
+## 59           31%Speer\n      Rep. 100% NA
+## 60         42%Kroeger\n      Dem. 100% NA
+## 61                    Uncontested      NA
+## 62          30%Obadal\n      Rep. 100% NA
+## 63           40%Meyer\n      Dem. 100% NA
+## 64          42%Schulz\n      Rep. 100% NA
+## 65          34%Foster\n      Rep. 100% NA
+## 66                    Uncontested      NA
+## 67           37%Seidl\n      Dem. 100% NA
+## 68         46%Donahue\n      Dem. 100% NA
+## 69                    Uncontested      NA
+## 70       37%Van Fleet\n      Rep. 100% NA
+## 71                    Uncontested      NA
+## 72           38%Wrage\n      Dem. 100% NA
+## 73                    Uncontested      NA
+## 74                    Uncontested      NA
+## 75         32%Denison\n      Dem. 100% NA
+## 76        38%Tornholm\n      Dem. 100% NA
+## 77        42%Phillips\n      Rep. 100% NA
+## 78          22%Miller\n      Lib. 100% NA
+## 79                    Uncontested      NA
+## 80          36%Grenko\n      Dem. 100% NA
+## 81                    Uncontested      NA
+## 82                    Uncontested      NA
+## 83                    Uncontested      NA
+## 84          31%Duncan\n      Dem.  95% NA
+## 85                    Uncontested      NA
+## 86                    Uncontested      NA
+## 87                    Uncontested      NA
+## 88            39%Drew\n      Dem. 100% NA
+## 89                    Uncontested      NA
+## 90                    Uncontested      NA
+## 91           46%Wiese\n      Dem. 100% NA
+## 92       44%Krumwiede\n      Dem. 100% NA
+## 93          48%Whalen\n      Rep. 100% NA
+## 94                    Uncontested      NA
+## 95       42%Whitehead\n      Dem. 100% NA
+## 96          35%Hanlon\n      Dem. 100% NA
+## 97            37%Wolf\n      Dem. 100% NA
+## 98      34%Eldrenkamp\n      Rep. 100% NA
+## 99                    Uncontested      NA
+## 100                   Uncontested      NA
+## 
+## [[8]]
+##             Question    Yes    No Rpt.   
+## 1 Retain Brent Appel 64%Yes 36%No 100% NA
+## 2 Retain Daryl Hecht 64%Yes 36%No 100% NA
+## 3   Retain Mark Cady 65%Yes 35%No 100% NA
+```
+
+---
+
+## Data Munging
+
+Most tables need a bit of clean-up:
+
+
+```r
+ia_results &lt;- tables[[2]] %&gt;% mutate(
+  Trump = parse_number(Trump),
+  Clinton = parse_number(Clinton)
+)
+ia_results
+```
+
+```
+##     Vote by county Trump Clinton
+## 1             Polk 93492  119804
+## 2             Linn 48390   58935
+## 3            Scott 39149   40440
+## 4          Johnson 21044   50200
+## 5       Black Hawk 27476   32233
+## 6            Story 19458   25709
+## 7          Dubuque 23460   22850
+## 8         Woodbury 24727   16210
+## 9    Pottawattamie 24447   15355
+## 10          Dallas 19339   15701
+## 11          Warren 14814   10411
+## 12         Clinton 11276   10095
+## 13     Cerro Gordo 11621    9862
+## 14       Muscatine  9584    8368
+## 15      Des Moines  9529    8212
+## 16          Jasper 10560    7109
+## 17           Sioux 14785    2300
+## 18        Marshall  9146    7652
+## 19          Marion 10962    5482
+## 20         Webster 10056    6305
+## 21             Lee  8803    6215
+## 22         Wapello  8715    5594
+## 23           Boone  7484    5541
+## 24          Benton  8232    4678
+## 25          Bremer  7208    5356
+## 26        Plymouth  9680    2885
+## 27      Winneshiek  5344    5254
+## 28      Washington  6173    3943
+## 29         Mahaska  7432    2619
+## 30         Carroll  6638    3309
+## 31       Dickinson  6753    3056
+## 32         Jackson  5824    3837
+## 33        Buchanan  5510    3970
+## 34           Jones  5720    3787
+## 35         Fayette  5620    3689
+## 36       Poweshiek  4946    4304
+## 37           Cedar  5295    3599
+## 38           Henry  5779    2904
+## 39        Delaware  5694    2957
+## 40         Clayton  5317    3237
+## 41            Iowa  5205    3084
+## 42            Tama  4971    3196
+## 43         Madison  5360    2678
+## 44            Clay  5877    2249
+## 45         Kossuth  5653    2543
+## 46          Hardin  5254    2787
+## 47     Buena Vista  4903    2856
+## 48       Jefferson  3748    3710
+## 49           Floyd  4375    3179
+## 50           Mills  5067    2090
+## 51        Hamilton  4463    2726
+## 52          Butler  4921    2157
+## 53        Harrison  4902    2131
+## 54         O'Brien  5752    1315
+## 55            Cass  4761    1951
+## 56            Page  4893    1807
+## 57        Crawford  4617    1991
+## 58       Allamakee  4093    2421
+## 59          Grundy  4527    1856
+## 60       Chickasaw  3742    2266
+## 61            Lyon  5192     920
+## 62          Shelby  4362    1662
+## 63        Cherokee  4192    1679
+## 64       Appanoose  4033    1814
+## 65          Wright  3800    1896
+## 66         Hancock  3977    1587
+## 67           Union  3525    1922
+## 68       Winnebago  3447    1931
+## 69         Guthrie  3628    1732
+## 70        Mitchell  3190    1888
+## 71             Sac  3703    1270
+## 72         Calhoun  3468    1398
+## 73        Humboldt  3568    1252
+## 74      Montgomery  3436    1314
+## 75          Louisa  3069    1648
+## 76          Keokuk  3390    1342
+## 77        Franklin  3163    1493
+## 78          Greene  2820    1691
+## 79           Emmet  3124    1357
+## 80       Palo Alto  3081    1398
+## 81          Monona  3120    1247
+## 82          Howard  2611    1677
+## 83          Clarke  2713    1465
+## 84           Lucas  2877    1239
+## 85           Worth  2453    1530
+## 86           Davis  2723     977
+## 87          Monroe  2638    1056
+## 88      Pocahontas  2702     963
+## 89           Adair  2461    1133
+## 90         Decatur  2296    1201
+## 91             Ida  2655     792
+## 92         Fremont  2407     963
+## 93       Van Buren  2527     845
+## 94         Audubon  2136    1080
+## 95         Osceola  2531     552
+## 96          Taylor  2111     758
+## 97           Wayne  2069     719
+## 98        Ringgold  1824     753
+## 99           Adams  1395     565
+## 100           &lt;NA&gt;    NA      NA
+```
+---
+class:inverse
+## Your Turn 
+
+Connect to the website of the NY Times election results at http://www.nytimes.com/elections/results/
+  
+- Pick your favorite state (by clicking on the state on the map)
+- Use `rvest` to download the election results for the 2016 Presidential Election for all counties of your state.
+- Clean up the data (numbers should be numbers).
+- Convert the numbers into row-wise percentages (decide on either %Republican or %Democrat).
+
+---
+class:inverse
+## Your Turn 
+
+Can you get the data you just scraped onto a map of the counties? - Try to map the percentage you calculated to the fill-color of the counties' polygons.
+
+You will need to `join` the percentages with the county polygons:
+
+
+```r
+counties &lt;- map_data("county")
+head(counties)
+```
+
+```
+##        long      lat group order  region subregion
+## 1 -86.50517 32.34920     1     1 alabama   autauga
+## 2 -86.53382 32.35493     1     2 alabama   autauga
+## 3 -86.54527 32.36639     1     3 alabama   autauga
+## 4 -86.55673 32.37785     1     4 alabama   autauga
+## 5 -86.57966 32.38357     1     5 alabama   autauga
+## 6 -86.59111 32.37785     1     6 alabama   autauga
+```
+
+---
+
+## Your Turn - Solution
+
+
+```r
+ia_results &lt;- ia_results %&gt;% mutate(
+  PercDem = Clinton/(Trump + Clinton)*100,
+  subregion = tolower(`Vote by county`)
+) 
+
+# Which counties don't work?
+anti_join(ia_results, counties %&gt;% filter(region=="iowa"), by="subregion")
+```
+
+```
+##   Vote by county Trump Clinton  PercDem subregion
+## 1        O'Brien  5752    1315 18.60761   o'brien
+## 2           &lt;NA&gt;    NA      NA       NA      &lt;NA&gt;
+```
+
+```r
+anti_join(counties %&gt;% filter(region=="iowa"), ia_results,  by="subregion")
+```
+
+```
+##        long      lat group order region subregion
+## 1 -95.86156 43.26404   825 26075   iowa    obrien
+## 2 -95.39174 43.26404   825 26076   iowa    obrien
+## 3 -95.39747 42.91454   825 26077   iowa    obrien
+## 4 -95.85583 42.90881   825 26078   iowa    obrien
+## 5 -95.86156 43.26404   825 26079   iowa    obrien
+```
+
+---
+
+## Your Turn - Solution (cont'd)
+
+
+```r
+ia_results &lt;- ia_results %&gt;% mutate(
+  subregion = replace(subregion, subregion=="o'brien", "obrien")
+) 
+
+ia_full &lt;- left_join(ia_results, 
+                     counties %&gt;% filter(region=="iowa"), 
+                     by="subregion")
+```
+
+---
+
+## Your Turn - Solution (cont'd)
+
+
+```r
+ia_full %&gt;% 
+  ggplot(aes( x = long, y = lat, group = subregion)) +
+  geom_polygon(aes(fill = PercDem), color = "black") + 
+  scale_fill_gradient2(midpoint=50, mid = "white") +
+  ggthemes::theme_map()
+```
+
+&lt;img src="01_web-scraping_files/figure-html/unnamed-chunk-7-1.png" width="75%" /&gt;
+
+---
+
+## Beyond tables
+
+Sometimes data on the web is not structured as nicely... e.g. let's assume we want to get a list of all recently active baseball players from [Baseball reference](http://www.baseball-reference.com/players/)
+
+.center[![:scale 80%](baseball_reference.png)]
+
+---
+
+## SelectorGadget
+
+- SelectorGadget is a javascript bookmarklet to determine the css selectors of pieces of a website we want to extract.
+- Bookmark the [SelectorGadget](javascript:(function(){var%20s=document.createElement('div');s.innerHTML='Loading...';s.style.color='black';s.style.padding='20px';s.style.position='fixed';s.style.zIndex='9999';s.style.fontSize='3.0em';s.style.border='2px%20solid%20black';s.style.right='40px';s.style.top='40px';s.setAttribute('class','selector_gadget_loading');s.style.background='white';document.body.appendChild(s);s=document.createElement('script');s.setAttribute('type','text/javascript');s.setAttribute('src','http://www.selectorgadget.com/stable/lib/selectorgadget.js?raw=true');document.body.appendChild(s);})();) link, then click on it to use it.
+- When SelectorGadget is active, pieces of the website are highlighted in orange/green/red.
+- Use SelectorGadget on http://www.baseball-reference.com/players/ .
+- read more details on `vignette("selectorgadget")`
+
+## SelectorGadget Result
+
+
+```r
+url &lt;- "http://www.baseball-reference.com/players/a/"
+html &lt;- read_html(url)
+html %&gt;% html_nodes("b a") %&gt;% html_text()
+```
+
+```
+##  [1] "Fernando Abad"       "Jose Abreu"         
+##  [3] "Dustin Ackley"       "Manny Acosta"       
+##  [5] "Ronald Acuna"        "Jason Adam"         
+##  [7] "Cristhian Adames"    "Willy Adames"       
+##  [9] "Austin Adams"        "Austin L. Adams"    
+## [11] "Chance Adams"        "Lane Adams"         
+## [13] "Matt Adams"          "Jim Adduci"         
+## [15] "Tim Adleman"         "Ehire Adrianza"     
+## [17] "Jesus Aguilar"       "Nick Ahmed"         
+## [19] "Matt Albers"         "Hanser Alberto"     
+## [21] "Ozzie Albies"        "Arismendy Alcantara"
+## [23] "Sandy Alcantara"     "Victor Alcantara"   
+## [25] "Scott Alexander"     "Jorge Alfaro"       
+## [27] "Anthony Alford"      "Kolby Allard"       
+## [29] "Cody Allen"          "Greg Allen"         
+## [31] "Abraham Almonte"     "Miguel Almonte"     
+## [33] "Yency Almonte"       "Albert Almora"      
+## [35] "Yonder Alonso"       "Dan Altavilla"      
+## [37] "Aaron Altherr"       "Jose Altuve"        
+## [39] "Jose Alvarado"       "Dario Alvarez"      
+## [41] "Henderson Alvarez"   "Jose Alvarez"       
+## [43] "Pedro Alvarez"       "R.J. Alvarez"       
+## [45] "Hector Ambriz"       "Brett Anderson"     
+## [47] "Brian Anderson"      "Chase Anderson"     
+## [49] "Cody Anderson"       "Drew Anderson"      
+## [51] "Justin Anderson"     "Tanner Anderson"    
+## [53] "Tim Anderson"        "Tyler Anderson"     
+## [55] "John Andreoli"       "Matt Andriese"      
+## [57] "Elvis Andrus"        "Miguel Andujar"     
+## [59] "Aristides Aquino"    "Victor Arano"       
+## [61] "Pedro Araujo"        "Chris Archer"       
+## [63] "Francisco Arcia"     "Orlando Arcia"      
+## [65] "Nolan Arenado"       "Shawn Armstrong"    
+## [67] "Jake Arrieta"        "Christian Arroyo"   
+## [69] "Cody Asche"          "Jairo Asencio"      
+## [71] "Alec Asher"          "Willians Astudillo" 
+## [73] "Carlos Asuaje"       "Tyler Austin"       
+## [75] "Abiatal Avelino"     "Alex Avila"         
+## [77] "Luis Avilan"         "John Axford"        
+## [79] "Erick Aybar"
+```
+
+## Example, varied
+
+We are, in fact, not just interested in the *names of the players*, but also in the *links* to each player's website
+
+- `html_attr` let's us access an attribute of an html node
+- `html_attrs` extracts all attributes of an html node
+
+
+```r
+html %&gt;% html_nodes("b a") %&gt;% html_attr(name="href")
+```
+
+```
+##  [1] "/players/a/abadfe01.shtml" 
+##  [2] "/players/a/abreujo02.shtml"
+##  [3] "/players/a/ackledu01.shtml"
+##  [4] "/players/a/acostma01.shtml"
+##  [5] "/players/a/acunaro01.shtml"
+##  [6] "/players/a/adamja01.shtml" 
+##  [7] "/players/a/adamecr01.shtml"
+##  [8] "/players/a/adamewi01.shtml"
+##  [9] "/players/a/adamsau01.shtml"
+## [10] "/players/a/adamsau02.shtml"
+## [11] "/players/a/adamsch01.shtml"
+## [12] "/players/a/adamsla01.shtml"
+## [13] "/players/a/adamsma01.shtml"
+## [14] "/players/a/adducji02.shtml"
+## [15] "/players/a/adlemti01.shtml"
+## [16] "/players/a/adriaeh01.shtml"
+## [17] "/players/a/aguilje01.shtml"
+## [18] "/players/a/ahmedni01.shtml"
+## [19] "/players/a/alberma01.shtml"
+## [20] "/players/a/alberha01.shtml"
+## [21] "/players/a/albieoz01.shtml"
+## [22] "/players/a/alcanar01.shtml"
+## [23] "/players/a/alcansa01.shtml"
+## [24] "/players/a/alcanvi01.shtml"
+## [25] "/players/a/alexasc02.shtml"
+## [26] "/players/a/alfarjo01.shtml"
+## [27] "/players/a/alforan01.shtml"
+## [28] "/players/a/allarko01.shtml"
+## [29] "/players/a/allenco01.shtml"
+## [30] "/players/a/allengr01.shtml"
+## [31] "/players/a/almonab01.shtml"
+## [32] "/players/a/almonmi01.shtml"
+## [33] "/players/a/almonye01.shtml"
+## [34] "/players/a/almoral01.shtml"
+## [35] "/players/a/alonsyo01.shtml"
+## [36] "/players/a/altavda01.shtml"
+## [37] "/players/a/altheaa01.shtml"
+## [38] "/players/a/altuvjo01.shtml"
+## [39] "/players/a/alvarjo03.shtml"
+## [40] "/players/a/alvarda01.shtml"
+## [41] "/players/a/alvarhe01.shtml"
+## [42] "/players/a/alvarjo02.shtml"
+## [43] "/players/a/alvarpe01.shtml"
+## [44] "/players/a/alvarrj01.shtml"
+## [45] "/players/a/ambrihe01.shtml"
+## [46] "/players/a/anderbr04.shtml"
+## [47] "/players/a/anderbr06.shtml"
+## [48] "/players/a/anderch01.shtml"
+## [49] "/players/a/anderco01.shtml"
+## [50] "/players/a/anderdr02.shtml"
+## [51] "/players/a/anderju01.shtml"
+## [52] "/players/a/anderta01.shtml"
+## [53] "/players/a/anderti01.shtml"
+## [54] "/players/a/anderty01.shtml"
+## [55] "/players/a/andrejo03.shtml"
+## [56] "/players/a/andrima01.shtml"
+## [57] "/players/a/andruel01.shtml"
+## [58] "/players/a/andujmi01.shtml"
+## [59] "/players/a/aquinar01.shtml"
+## [60] "/players/a/aranovi01.shtml"
+## [61] "/players/a/araujpe01.shtml"
+## [62] "/players/a/archech01.shtml"
+## [63] "/players/a/arciafr01.shtml"
+## [64] "/players/a/arciaor01.shtml"
+## [65] "/players/a/arenano01.shtml"
+## [66] "/players/a/armstsh01.shtml"
+## [67] "/players/a/arrieja01.shtml"
+## [68] "/players/a/arroych01.shtml"
+## [69] "/players/a/ascheco01.shtml"
+## [70] "/players/v/valdelu01.shtml"
+## [71] "/players/a/asheral01.shtml"
+## [72] "/players/a/astudwi01.shtml"
+## [73] "/players/a/asuajca01.shtml"
+## [74] "/players/a/austity01.shtml"
+## [75] "/players/a/aveliab01.shtml"
+## [76] "/players/a/avilaal01.shtml"
+## [77] "/players/a/avilalu01.shtml"
+## [78] "/players/a/axforjo01.shtml"
+## [79] "/players/a/aybarer01.shtml"
+```
+
+## Your Turn
+
+Use the [SelectorGadget](javascript:(function(){var%20s=document.createElement('div');s.innerHTML='Loading...';s.style.color='black';s.style.padding='20px';s.style.position='fixed';s.style.zIndex='9999';s.style.fontSize='3.0em';s.style.border='2px%20solid%20black';s.style.right='40px';s.style.top='40px';s.setAttribute('class','selector_gadget_loading');s.style.background='white';document.body.appendChild(s);s=document.createElement('script');s.setAttribute('type','text/javascript');s.setAttribute('src','http://www.selectorgadget.com/stable/lib/selectorgadget.js?raw=true');document.body.appendChild(s);})();) on the website for [David Aardsma](http://www.baseball-reference.com/players/a/aardsda01.shtml)
+
+Find the css description to extract his career statistics and load them into your R session.
+
+Does the same code work to extract career statistics for (some of) the other players?
+
+What other information do we need to know? - and how can we get to that?
+
+## Your Turn  - Solution
+
+
+```r
+url &lt;- "http://www.baseball-reference.com/players/a/aardsda01.shtml"
+html &lt;- read_html(url)
+html %&gt;% html_nodes(".stats_pullout .poptip") %&gt;% html_text()
+```
+
+```
+##  [1] "WAR"  "W"    "L"    "ERA"  "G"    "GS"   "SV"   "IP"  
+##  [9] "SO"   "WHIP"
+```
+
+```r
+html %&gt;% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %&gt;% html_text()
+```
+
+```
+##  [1] "1.7"   "16"    "18"    "4.27"  "331"   "0"     "69"   
+##  [8] "337.0" "340"   "1.421"
+```
+
+## Your Turn  - Solution (cont'd)
+
+Now apply to other players (with 'a' as starting letter) - first we get everything tidied up in a dataset
+
+
+```r
+url &lt;- "http://www.baseball-reference.com/players/a/"
+html &lt;- read_html(url)
+players &lt;- html %&gt;% html_nodes("b a") %&gt;% html_text()
+links &lt;- html %&gt;% html_nodes("b a") %&gt;% html_attr(name="href")
+
+bb &lt;- data.frame(players=players, links = links)
+```
+
+
+## Your Turn  - Solution (cont'd)
+
+second, we follow the links to get to career statistics:
+  
+  
+  ```r
+  getStats &lt;- function(link) {
+  s &lt;- html_session("http://www.baseball-reference.com")
+  s &lt;- s %&gt;% jump_to(link)
+  html &lt;- read_html(s)
+  type &lt;- html %&gt;% html_nodes(".stats_pullout .poptip") %&gt;% html_text() 
+  values &lt;- html %&gt;% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %&gt;% html_text()
+  what &lt;- html %&gt;% html_nodes(".stats_pullout strong") %&gt;% html_text()
+  df &lt;- data.frame(type=rep(type, each=length(what)), values=values, what = rep(what, length(values)))
+  df
+  }
+  
+  bbhead &lt;- bb[1:5,] %&gt;% mutate(
+  career = links %&gt;% purrr::map(getStats)
+  ) 
+  bbhead[,c("players", "career")]
+  ```
+  
+  ```
+  ##         players
+  ## 1 Fernando Abad
+  ## 2    Jose Abreu
+  ## 3 Dustin Ackley
+  ## 4  Manny Acosta
+  ## 5  Ronald Acuna
+  ##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       career
+  ## 1                                                                                                                                                                                                                                                                                                                                                                                                                                              9, 8, 5, 1, 2, 3, 7, 4, 6, 10, 15, 20, 13, 16, 18, 19, 12, 17, 14, 11, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21
+  ## 2 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 21, 26, 32, 29, 23, 36, 28, 25, 13, 14, 33, 30, 34, 31, 27, 35, 15, 16, 17, 18, 19, 20, 22, 24, 21, 26, 32, 29, 23, 36, 28, 25, 13, 14, 33, 30, 34, 31, 27, 35, 15, 16, 17, 18, 19, 20, 22, 24, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38
+  ## 3                                                                                                                                                                                                                                                                                                                                                                                                                      12, 1, 3, 4, 2, 8, 9, 10, 5, 11, 6, 7, 23, 17, 22, 21, 13, 19, 18, 20, 14, 15, 16, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25
+  ## 4                                                                                                                                                                                                                                                                                                                                                                                                                                              9, 8, 5, 1, 2, 3, 7, 4, 6, 10, 12, 14, 14, 18, 16, 11, 19, 17, 15, 13, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
+  ## 5 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 21, 21, 22, 22, 17, 17, 20, 20, 13, 13, 24, 24, 23, 23, 19, 19, 14, 14, 15, 15, 16, 16, 18, 18, 21, 21, 22, 22, 17, 17, 20, 20, 13, 13, 24, 24, 23, 23, 19, 19, 14, 14, 15, 15, 16, 16, 18, 18, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26
+  ```
+
+## Your Turn  - Solution (cont'd)
+
+We also need to know the position a player has ...
+
+This information has the css path "#meta p:nth-child(2)"
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
