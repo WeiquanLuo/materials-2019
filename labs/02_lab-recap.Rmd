@@ -191,7 +191,7 @@ ggplot() + geom_sf(data=de, fill="grey30")
 
 ---
 
-Some shapefiles, particulrly for smaller countries, need an adjustment to the parameter settings:
+Some shapefiles, particularly for smaller countries, need an adjustment to the parameter settings:
 
 ```{r}
 de_st2 <- maptools::thinnedSpatialPoly(as(debig, "Spatial"), 

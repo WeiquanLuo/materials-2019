@@ -1,0 +1,513 @@
+---
+title: 'Lab Assignment #3: Wrapping the world in a package'
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE, echo = TRUE)
+```
+# Outline
+
+- Creating an R package
+
+- Cleaning up last lab's code and wrapping it in functions
+
+- Writing some tests and documentation
+
+
+<br><br><br>
+
+The final deliverable is again a self-contained RMarkdown file.
+
+We will install your package, read through the documentation, run some examples and run your tests on it (we might have some tests of our own as well).
+
+
+---
+
+# Lab organization
+
+1. In RStudio, create a new package as a team, i.e. only one of you should create the package. Make sure that the package is not yet used as an R package on CRAN. 
+
+2. Create a corresponding github repository.  Make sure to create a README.Rmd file, that keeps the md file (see yaml options).
+Make all of the team members contributors (under `Settings` > `Collaborators`)
+
+3. Include a link to the repository in the README.Rmd file
+
+
+---
+
+# Last time ...
+
+... you were asked to write a function that allowed you to create a data frame from 
+a `geometry` variable
+
+# This time:
+
+- each team member is asked to pick the solution to last time's lab (listed in the back) from a different team (and not the team they were on)
+
+- wrap the solution into a function of the form
+
+`team_X <- function(file, tolerance)` where `X` is the solution for team X used,  file is a file path to a shape file and 
+tolerance is the value used for thinning the polygon
+
+
+The return value is a data frame of the geographic information of the polygons and the additional information (such as name of the country, name of the territory/state, ...)
+
+---
+
+# Documentation
+
+Using roxygen tags, appropriately document function `team_X`.
+
+# Checks
+
+Include checks on elements of your function to ensure your function cannot be broken easily and gives appropriate warning or error messages.
+
+# Testing
+
+Write tests to ensure your function is working as intended.
+
+---
+
+# Deliverable
+
+**Upload your README.Rmd file to Canvas. Only one submission per team is required. 
+Finishing touches can be made until Sunday, Mar 24, 10 pm.**
+
+---
+
+# Necessary preparation for any solution
+
+```{r dependencies, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(purrr)
+library(sf)
+
+ozbig <- read_sf("./data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(as(ozbig, "Spatial"), tolerance = 0.1, minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+
+```
+
+---
+
+## Team 1
+
+```{r}
+df.oz.purr <- oz$geometry %>%
+  map_depth(3, data.frame) %>%
+  purrr::flatten() %>%
+  purrr::flatten() %>%
+  bind_rows(.id = "group") %>%
+  rename("lat" = y, "long" = x)
+
+# df.oz.purr %>% 
+#   ggplot(aes(x = long, y = lat, group = group)) + 
+#     geom_polygon()
+```
+
+---
+
+## Team 2
+
+```{r}
+## Help calculate the group.
+## Input: oz$geometry
+helper.group <- function(geo){
+  geo %>% flatten() %>% flatten()-> dd
+  countgrouprep <- flatten_int(map(dd, nrow))
+  num_group <- length(countgrouprep)
+  rep(1:num_group, time = countgrouprep)
+}
+
+## Help calculate the order.
+## Input: oz$geometry[[i]]
+helper.order <- function(geol){
+  geol %>% flatten() -> d
+  longlat <- do.call(rbind, d)
+  order_num <- sum(flatten_int(map(d, nrow)))
+  order <- seq(1:order_num)
+  cbind(longlat, order)
+}
+```
+
+---
+
+```{r}
+## Converts shapefile to lat-long file
+## Input: oz$geometry
+sh2lat <- function(geofile){
+  res <- map(geofile, .f=helper.order)
+  ress <- do.call(rbind, res)
+  group <- helper.group(geofile)
+  ress <- cbind(ress, group)
+  colnames(ress) <- c("long", "lat", "order", "group")
+  ress <- as.data.frame(ress)
+}
+
+ozplus <- sh2lat(oz$geometry)
+#ozplus %>% ggplot(aes(x=long,y=lat,group=group)) + 
+#  geom_polygon() + theme_bw()
+```
+
+---
+
+## Team 3
+
+```{r}
+drawmap <- function(dat) {
+  con_big <- read_sf(dat)
+  con_st <- maptools::thinnedSpatialPoly(
+    as(con_big, "Spatial"), tolerance = 0.1, 
+    minarea = 0.001, topologyPreserve = TRUE)
+  con <- st_as_sf(con_st)
+  con_plus <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., as.data.frame) %>% 
+    bind_rows() %>% 
+    rename(., c("x" ="long", "y" = "lat"))
+  temp <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., nrow) %>% 
+    unlist
+  con_plus$group <- rep(1 : length(temp), temp)
+
+  con_plus %>% 
+    ggplot(aes(x = long, y = lat, group = group)) + 
+    geom_polygon()
+}
+```
+
+---
+
+```{r, eval = FALSE}
+# drawmap(dat = "data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+```
+
+---
+
+## Team 4
+
+```{r}
+poly2df <- function(feature, unlist = T) {
+  if (unlist) feature <- unlist(feature, recursive = F)
+  lapply(feature, function(x) {
+    mutate(rename_all(data.frame(x), ~ c("long", "lat")), order = row_number())
+  }) %>% tibble(polygon = .)
+}
+
+# create new dataset reforming geometry to long, lat, order, group
+makedata <- function(data, thin = T, unlist = T) {
+  if (thin) {
+    oz_st <- maptools::thinnedSpatialPoly(as(data, "Spatial"), tol = 0.1, min = 0.001, topologyPreserve = T)
+    oz <- st_as_sf(oz_st)  # install package: rgeos
+  } else oz <- data
+  
+  as_tibble(oz) %>% mutate(new = map(geometry, poly2df, unlist = unlist)) %>% select(-geometry) %>%
+    unnest() %>% mutate(group = row_number()) %>% unnest()
+}
+```
+
+---
+
+```{r}
+australia <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+australia_plus <- makedata(australia)
+# australia_plus %>%
+#   ggplot(aes(x = long, y = lat, group = group)) +
+#   geom_polygon(color = "black", fill = "white", size = 0.2) +
+#   labs(x = "Longitude", y = "Latitude", title = "Australia") +
+#   coord_fixed() +
+#   theme_bw() +
+#   theme(plot.title = element_text(hjust = 0.5))
+```
+
+---
+
+## Team 5
+
+```{r}
+Mat2Df <- function(Mat){
+  long <- Mat[,1]
+  lat <- Mat[,2]
+  order <- 1:nrow(Mat)
+  group <- rep(rnorm(1),nrow(Mat))
+  df <- data.frame(long=long,lat=lat,group=group,order=order)
+  df
+}
+oz_flatten <- flatten(flatten(oz$geometry))
+ozplus <- purrr::map_df(.x=oz_flatten,.f=Mat2Df)
+#ozplus %>% ggplot(aes(x=long, y=lat, group=group)) + 
+#  geom_polygon()
+```
+
+---
+
+## Team 6
+
+```{r}
+mat2df <- function(mat) {
+  df <- data.frame(long = mat[, 1],
+                   lat  = mat[, 2], 
+                   temporary.group = sum(mat[,1]+mat[,2] *nrow(mat) + rnorm(1, 100, 10)), 
+                   order= 1:nrow(mat))
+  df
+}
+```
+
+```{r}
+
+# flatten oz$geometry twice to obtain a list of matrices
+# this is because we have two layers of lists ahead of matrices
+oz.geometry.flattened <- oz$geometry %>% flatten() %>% flatten()
+
+# Create a dataframe ozplus from the geometry variable using purrr
+# map_df applies a function to elements of a list and bind the dataframes together
+# Instead of temporary.group variable by the function mat2df, 
+# group variable consisting of the index corresponding each matrix will be used.
+ozplus <- oz.geometry.flattened %>% purrr::map_df(.x = ., .id ="group", .f = mat2df)
+
+# plot the result
+# ozplus %>% ggplot(aes(x = long, y = lat, group = group)) + geom_polygon()
+```
+
+---
+
+## Team 7
+
+```{r}
+f <- function(dframe){
+  dframe <- data.frame(order = c(1:nrow(dframe)), long = dframe$x, lat = dframe$y)
+}
+
+## Here our depth is 3, but that could change depending on the file
+ozplus <- oz$geometry %>% 
+  modify_depth(3,data.frame) %>% 
+  modify_depth(3,f) %>%
+  flatten() %>%
+  flatten() %>%
+  bind_rows(.id = "group")
+
+# ozplus %>% 
+#   ggplot(aes(x = long, y = lat, group = group)) + 
+#   geom_polygon(fill = "white", colour = "black", lwd = 1)+
+#   theme_bw()+
+#   coord_quickmap()
+```
+
+---
+
+## Team 8
+
+```{r}
+# Helper fucntion to turn one of these matrices into a single data frame with variables long, lat, group, order. 
+helper <- function(y) {
+  data <- data.frame(long = y[, 1],
+                     lat  = y[, 2], 
+                     groups = rep(rnorm(1),nrow(y)),
+                     order = 1:nrow(y))
+  data
+}
+
+geometry <- oz$geometry
+
+# In order to receive list of matrices, we used the flatten 
+matrix <- geometry %>% flatten() %>% flatten()
+
+# By using  purrr functionality, we create the dataframe
+ozplus <- matrix %>% purrr::map_df(.x = ., .id ="group", .f = helper)
+
+# Plot the map
+#ozplus %>% ggplot(aes(x = long, y = lat, group = group)) + geom_polygon()
+```
+
+---
+
+## Team 9
+
+this slide does not show the whole solution - make sure to go to the Rmd file on github to get the complete solution
+```{r, echo = -21:-35}
+reoganise <- function(x) {
+  ### i, j, k represent the index of the geometry[[i]][[j]][[k]])
+  ### work on k
+  reorganise_k <- function(x) {
+    force(x)
+    y <- data.frame(x, group = group, order = 1:nrow(x), i = i, j = j, k = k)
+    group <<- group + 1
+    k <<- k + 1
+    return(y)
+  }
+  
+  ### work on j
+  reorganise_j <- function(x) {
+    force(x)
+    k <<- 1
+    y <- lapply(x, FUN = reorganise_k)
+    j <<- j + 1
+    return(y)
+  }
+  
+  ### work on i
+  reorganise_i <- function(x) {
+    force(x)
+    j <<- 1
+    y <- lapply(x, FUN = reorganise_j)
+    i <<- i + 1
+    return(y)
+  }
+  
+  # set initial value
+  group <- 1
+  i <- 1
+  j <- 1
+  k <- 1
+  
+  # run
+  geometry_my1 <- lapply(x, reorganise_i)
+  
+  reducetodata <- function(x) {
+    lapply(x, Reduce, f = rbind)
+  }
+  
+  temp1 <- lapply(geometry_my1, reducetodata)
+  temp2 <- lapply(temp1, Reduce, f = rbind)
+  ozplus <- Reduce(rbind, temp2)
+
+  names(ozplus) <- c("long", "lat", "group", "order", "i", "j", "k")
+  return(ozplus)
+}
+```
+
+---
+
+```{r}
+oz_reorg <- reoganise(oz$geometry)
+
+# oz_reorg %>% ggplot(aes(x = long, y = lat, group = group)) + 
+#   geom_polygon()
+```
+
+---
+
+## Team 10
+
+```{r}
+shpBigToSmall <- function(dsn) {
+  
+  shpbig <- read_sf(dsn)
+  shp_st <- maptools::thinnedSpatialPoly(
+    as(shpbig, "Spatial"), tolerance = 0.1, 
+    minarea = 0.001, topologyPreserve = TRUE)
+  shp <- st_as_sf(shp_st)
+  
+  shpSmall <- shp %>% select(NAME_1, geometry) %>% 
+    group_by() %>% 
+    mutate(coord = geometry %>% map(.f = function(m) flatten(.x=m)),
+           region = row_number()) %>% 
+    unnest
+  st_geometry(shpSmall) <- NULL
+  shpSmall <- shpSmall %>% 
+    mutate(coord = coord %>% map(.f = function(m) as_tibble(m)),
+                                group = row_number()) %>% 
+    unnest %>% 
+    setNames(c("name", "region","group", "long", "lat"))
+
+  return(shpSmall) 
+}
+```
+
+---
+
+```{r}
+dsn <- "data/gadm36_AUS_shp/gadm36_AUS_1.shp"
+shpSmall <- shpBigToSmall(dsn)
+plotMap <- shpSmall %>% ggplot(aes(x = long, y = lat, group = group)) + 
+  geom_polygon(color = "black")
+#print(plotMap)
+```
+
+---
+
+## Team 11
+
+```{r}
+# This function extracts data from a shapefile with 2 levels in spf$geometry
+extract_data_L2 <- function(spf) {
+# Reads in the shapefile and extracts data from nested lists, finally
+# recording them into one data frame with columns: long, lat, group and
+# order.
+#
+# Args:
+#   spf:    shapefile of a country
+#
+# Output:
+#   df:     data frame
+    
+    map_depth(.x = spf$geometry, 2, .f = c(1)) %>% flatten %>% 
+        map_dfr(data.frame, .id = "group") -> df 
+    
+    # rename columns
+    colnames(df) <- c("group", "long", "lat")
+    
+    # add new variable = "order"
+    df$order <- seq(from = 1, to = nrow(df), by = 1)
+    
+    return(df)
+}
+```
+
+---
+
+```{r}
+ozplus <- extract_data_L2(oz)
+
+# # plot
+# ozplus %>% ggplot(aes(x = long, y = lat, group = group, na.rm = TRUE)) + geom_polygon(colour = "black", fill = "grey50")
+```
+
+---
+
+## Team 12
+
+```{r}
+helper <- function(d){
+  d <- unlist(d,recursive = FALSE)
+  d <- purrr::map(d,.f=add_order)
+  d <- add_layer(d)
+  return(d)
+}
+
+
+add_order <- function(d){
+  l <- nrow(d)
+  return(cbind(d,seq(1,l,by=1)))
+}
+add_layer <- function(d){
+  ll <- unlist(lapply(d,nrow))
+  d <- do.call(rbind,d)
+  d <- cbind(d,rep(c(1:length(ll)),time=ll))
+  return(d)
+}
+```
+---
+
+```{r}
+purrr::map(oz$geometry, .f=helper) -> res
+
+res <- add_layer(res)
+colnames(res) <- c('long','lat','order','group','geo')
+res <- as.data.frame(res)
+
+# ggplot(data=res)+
+#   geom_path(aes(x=long,y=lat,
+#                 group=paste(res$geo,res$group,sep='.'))) + 
+#   theme_bw()
+```
