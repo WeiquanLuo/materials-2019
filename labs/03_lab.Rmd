@@ -95,6 +95,24 @@ oz <- st_as_sf(oz_st)
 
 ```
 
+
+---
+
+# Travis
+
+Your `.travis.yml` file should look like this:
+
+```
+language: r
+cache: packages
+sudo: required
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntugis/ppa --yes
+  - sudo apt-get --yes --force-yes update -qq
+  - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
+```
+
 ---
 
 ## Team 1
