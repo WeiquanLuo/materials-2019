@@ -32,7 +32,7 @@ We will install your package, read through the documentation, run some examples 
 
 # Lab organization
 
-1. In RStudio, create a new package as a team, i.e. only one of you should create the package. Make sure that the package is not yet used as an R package on CRAN. 
+1. In RStudio, create a new package as a team, i.e. only one of you should create the package. Make sure that the package name is not already an R package on CRAN. 
 
 2. Create a corresponding github repository.  Make sure to create a README.Rmd file, that keeps the md file (see yaml options).
 Make all of the team members contributors (under `Settings` > `Collaborators`)
