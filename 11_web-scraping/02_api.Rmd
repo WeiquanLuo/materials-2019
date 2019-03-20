@@ -29,7 +29,7 @@ library(tidyverse)
 
 - Intended to make data available for other applications (e.g. developers of android apps, etc.)
     - More convenient than scraping HTML directly
-    - Data is usually cleaner and structured 
+    - Data is usually cleaner and better structured 
 
 ---
 
