@@ -893,8 +893,11 @@ class:inverse
 Connect to the website of the NY Times election results at http://www.nytimes.com/elections/results/
   
 - Pick your favorite state (by clicking on the state on the map)
+
 - Use `rvest` to download the election results for the 2016 Presidential Election for all counties of your state.
+
 - Clean up the data (numbers should be numbers).
+
 - Convert the numbers into row-wise percentages (decide on either %Republican or %Democrat).
 
 ---
@@ -998,10 +1001,18 @@ Sometimes data on the web is not structured as nicely... e.g. let's assume we wa
 ## SelectorGadget
 
 - SelectorGadget is a javascript bookmarklet to determine the css selectors of pieces of a website we want to extract.
-- Bookmark the [SelectorGadget](javascript:(function(){var%20s=document.createElement('div');s.innerHTML='Loading...';s.style.color='black';s.style.padding='20px';s.style.position='fixed';s.style.zIndex='9999';s.style.fontSize='3.0em';s.style.border='2px%20solid%20black';s.style.right='40px';s.style.top='40px';s.setAttribute('class','selector_gadget_loading');s.style.background='white';document.body.appendChild(s);s=document.createElement('script');s.setAttribute('type','text/javascript');s.setAttribute('src','http://www.selectorgadget.com/stable/lib/selectorgadget.js?raw=true');document.body.appendChild(s);})();) link, then click on it to use it.
+
+- Bookmark the [SelectorGadget](https://selectorgadget.com/) link, then click on it to use it (or add the chrome extension)
+
 - When SelectorGadget is active, pieces of the website are highlighted in orange/green/red.
+
 - Use SelectorGadget on http://www.baseball-reference.com/players/ .
-- read more details on `vignette("selectorgadget")`
+
+- Read more details on `vignette("selectorgadget")`
+
+If you prefer, you can also read the HTML code and create your own [CSS](https://www.w3schools.com/cssref/css_selectors.asp) or [XPATH](https://www.w3schools.com/xml/xpath_syntax.asp) selectors. 
+
+---
 
 ## SelectorGadget Result
 
@@ -1009,57 +1020,46 @@ Sometimes data on the web is not structured as nicely... e.g. let's assume we wa
 ```r
 url &lt;- "http://www.baseball-reference.com/players/a/"
 html &lt;- read_html(url)
-html %&gt;% html_nodes("b a") %&gt;% html_text()
+html %&gt;% html_nodes("strong a") %&gt;% html_text()
 ```
 
 ```
-##  [1] "Fernando Abad"       "Jose Abreu"         
-##  [3] "Dustin Ackley"       "Manny Acosta"       
-##  [5] "Ronald Acuna"        "Jason Adam"         
-##  [7] "Cristhian Adames"    "Willy Adames"       
-##  [9] "Austin Adams"        "Austin L. Adams"    
-## [11] "Chance Adams"        "Lane Adams"         
-## [13] "Matt Adams"          "Jim Adduci"         
-## [15] "Tim Adleman"         "Ehire Adrianza"     
-## [17] "Jesus Aguilar"       "Nick Ahmed"         
-## [19] "Matt Albers"         "Hanser Alberto"     
-## [21] "Ozzie Albies"        "Arismendy Alcantara"
-## [23] "Sandy Alcantara"     "Victor Alcantara"   
-## [25] "Scott Alexander"     "Jorge Alfaro"       
-## [27] "Anthony Alford"      "Kolby Allard"       
-## [29] "Cody Allen"          "Greg Allen"         
-## [31] "Abraham Almonte"     "Miguel Almonte"     
-## [33] "Yency Almonte"       "Albert Almora"      
-## [35] "Yonder Alonso"       "Dan Altavilla"      
-## [37] "Aaron Altherr"       "Jose Altuve"        
-## [39] "Jose Alvarado"       "Dario Alvarez"      
-## [41] "Henderson Alvarez"   "Jose Alvarez"       
-## [43] "Pedro Alvarez"       "R.J. Alvarez"       
-## [45] "Hector Ambriz"       "Brett Anderson"     
-## [47] "Brian Anderson"      "Chase Anderson"     
-## [49] "Cody Anderson"       "Drew Anderson"      
-## [51] "Justin Anderson"     "Tanner Anderson"    
-## [53] "Tim Anderson"        "Tyler Anderson"     
-## [55] "John Andreoli"       "Matt Andriese"      
-## [57] "Elvis Andrus"        "Miguel Andujar"     
-## [59] "Aristides Aquino"    "Victor Arano"       
-## [61] "Pedro Araujo"        "Chris Archer"       
-## [63] "Francisco Arcia"     "Orlando Arcia"      
-## [65] "Nolan Arenado"       "Shawn Armstrong"    
-## [67] "Jake Arrieta"        "Christian Arroyo"   
-## [69] "Cody Asche"          "Jairo Asencio"      
-## [71] "Alec Asher"          "Willians Astudillo" 
-## [73] "Carlos Asuaje"       "Tyler Austin"       
-## [75] "Abiatal Avelino"     "Alex Avila"         
-## [77] "Luis Avilan"         "John Axford"        
-## [79] "Erick Aybar"
+##  [1] "Jose Abreu"        "Matt Adams"       
+##  [3] "Matt Albers"       "Yonder Alonso"    
+##  [5] "Jose Altuve"       "Henderson Alvarez"
+##  [7] "Pedro Alvarez"     "Brett Anderson"   
+##  [9] "Chase Anderson"    "Elvis Andrus"     
+## [11] "Chris Archer"      "Nolan Arenado"    
+## [13] "Jake Arrieta"      "Alex Avila"       
+## [15] "Luis Avilan"       "John Axford"      
+## [17] "Erick Aybar"       "Jose Abreu"       
+## [19] "Matt Adams"        "Matt Albers"      
+## [21] "Yonder Alonso"     "Jose Altuve"      
+## [23] "Henderson Alvarez" "Pedro Alvarez"    
+## [25] "Brett Anderson"    "Chase Anderson"   
+## [27] "Elvis Andrus"      "Chris Archer"     
+## [29] "Nolan Arenado"     "Jake Arrieta"     
+## [31] "Alex Avila"        "Luis Avilan"      
+## [33] "John Axford"       "Erick Aybar"      
+## [35] "Jose Abreu"        "Matt Adams"       
+## [37] "Matt Albers"       "Yonder Alonso"    
+## [39] "Jose Altuve"       "Henderson Alvarez"
+## [41] "Pedro Alvarez"     "Brett Anderson"   
+## [43] "Chase Anderson"    "Elvis Andrus"     
+## [45] "Chris Archer"      "Nolan Arenado"    
+## [47] "Jake Arrieta"      "Alex Avila"       
+## [49] "Luis Avilan"       "John Axford"      
+## [51] "Erick Aybar"
 ```
+
+---
 
 ## Example, varied
 
 We are, in fact, not just interested in the *names of the players*, but also in the *links* to each player's website
 
 - `html_attr` let's us access an attribute of an html node
+
 - `html_attrs` extracts all attributes of an html node
 
 
@@ -1070,94 +1070,97 @@ html %&gt;% html_nodes("b a") %&gt;% html_attr(name="href")
 ```
 ##  [1] "/players/a/abadfe01.shtml" 
 ##  [2] "/players/a/abreujo02.shtml"
-##  [3] "/players/a/ackledu01.shtml"
-##  [4] "/players/a/acostma01.shtml"
-##  [5] "/players/a/acunaro01.shtml"
-##  [6] "/players/a/adamja01.shtml" 
-##  [7] "/players/a/adamecr01.shtml"
-##  [8] "/players/a/adamewi01.shtml"
-##  [9] "/players/a/adamsau01.shtml"
-## [10] "/players/a/adamsau02.shtml"
-## [11] "/players/a/adamsch01.shtml"
-## [12] "/players/a/adamsla01.shtml"
-## [13] "/players/a/adamsma01.shtml"
-## [14] "/players/a/adducji02.shtml"
-## [15] "/players/a/adlemti01.shtml"
-## [16] "/players/a/adriaeh01.shtml"
-## [17] "/players/a/aguilje01.shtml"
-## [18] "/players/a/ahmedni01.shtml"
-## [19] "/players/a/alberma01.shtml"
-## [20] "/players/a/alberha01.shtml"
-## [21] "/players/a/albieoz01.shtml"
-## [22] "/players/a/alcanar01.shtml"
-## [23] "/players/a/alcansa01.shtml"
-## [24] "/players/a/alcanvi01.shtml"
-## [25] "/players/a/alexasc02.shtml"
-## [26] "/players/a/alfarjo01.shtml"
-## [27] "/players/a/alforan01.shtml"
-## [28] "/players/a/allarko01.shtml"
-## [29] "/players/a/allenco01.shtml"
-## [30] "/players/a/allengr01.shtml"
-## [31] "/players/a/almonab01.shtml"
-## [32] "/players/a/almonmi01.shtml"
-## [33] "/players/a/almonye01.shtml"
-## [34] "/players/a/almoral01.shtml"
-## [35] "/players/a/alonsyo01.shtml"
-## [36] "/players/a/altavda01.shtml"
-## [37] "/players/a/altheaa01.shtml"
-## [38] "/players/a/altuvjo01.shtml"
-## [39] "/players/a/alvarjo03.shtml"
-## [40] "/players/a/alvarda01.shtml"
-## [41] "/players/a/alvarhe01.shtml"
-## [42] "/players/a/alvarjo02.shtml"
-## [43] "/players/a/alvarpe01.shtml"
-## [44] "/players/a/alvarrj01.shtml"
-## [45] "/players/a/ambrihe01.shtml"
-## [46] "/players/a/anderbr04.shtml"
-## [47] "/players/a/anderbr06.shtml"
-## [48] "/players/a/anderch01.shtml"
-## [49] "/players/a/anderco01.shtml"
-## [50] "/players/a/anderdr02.shtml"
-## [51] "/players/a/anderju01.shtml"
-## [52] "/players/a/anderta01.shtml"
-## [53] "/players/a/anderti01.shtml"
-## [54] "/players/a/anderty01.shtml"
-## [55] "/players/a/andrejo03.shtml"
-## [56] "/players/a/andrima01.shtml"
-## [57] "/players/a/andruel01.shtml"
-## [58] "/players/a/andujmi01.shtml"
-## [59] "/players/a/aquinar01.shtml"
-## [60] "/players/a/aranovi01.shtml"
-## [61] "/players/a/araujpe01.shtml"
-## [62] "/players/a/archech01.shtml"
-## [63] "/players/a/arciafr01.shtml"
-## [64] "/players/a/arciaor01.shtml"
-## [65] "/players/a/arenano01.shtml"
-## [66] "/players/a/armstsh01.shtml"
-## [67] "/players/a/arrieja01.shtml"
-## [68] "/players/a/arroych01.shtml"
-## [69] "/players/a/ascheco01.shtml"
-## [70] "/players/v/valdelu01.shtml"
-## [71] "/players/a/asheral01.shtml"
-## [72] "/players/a/astudwi01.shtml"
-## [73] "/players/a/asuajca01.shtml"
-## [74] "/players/a/austity01.shtml"
-## [75] "/players/a/aveliab01.shtml"
-## [76] "/players/a/avilaal01.shtml"
-## [77] "/players/a/avilalu01.shtml"
-## [78] "/players/a/axforjo01.shtml"
-## [79] "/players/a/aybarer01.shtml"
+##  [3] "/players/a/acostma01.shtml"
+##  [4] "/players/a/acunaro01.shtml"
+##  [5] "/players/a/adamja01.shtml" 
+##  [6] "/players/a/adamecr01.shtml"
+##  [7] "/players/a/adamewi01.shtml"
+##  [8] "/players/a/adamsau01.shtml"
+##  [9] "/players/a/adamsau02.shtml"
+## [10] "/players/a/adamsch01.shtml"
+## [11] "/players/a/adamsla01.shtml"
+## [12] "/players/a/adamsma01.shtml"
+## [13] "/players/a/adducji02.shtml"
+## [14] "/players/a/adlemti01.shtml"
+## [15] "/players/a/adriaeh01.shtml"
+## [16] "/players/a/aguilje01.shtml"
+## [17] "/players/a/ahmedni01.shtml"
+## [18] "/players/a/alberma01.shtml"
+## [19] "/players/a/alberha01.shtml"
+## [20] "/players/a/albieoz01.shtml"
+## [21] "/players/a/alcanar01.shtml"
+## [22] "/players/a/alcansa01.shtml"
+## [23] "/players/a/alcanvi01.shtml"
+## [24] "/players/a/alexasc02.shtml"
+## [25] "/players/a/alfarjo01.shtml"
+## [26] "/players/a/alforan01.shtml"
+## [27] "/players/a/allarko01.shtml"
+## [28] "/players/a/allenco01.shtml"
+## [29] "/players/a/allengr01.shtml"
+## [30] "/players/a/almonab01.shtml"
+## [31] "/players/a/almonmi01.shtml"
+## [32] "/players/a/almonye01.shtml"
+## [33] "/players/a/almoral01.shtml"
+## [34] "/players/a/alonsyo01.shtml"
+## [35] "/players/a/altavda01.shtml"
+## [36] "/players/a/altheaa01.shtml"
+## [37] "/players/a/altuvjo01.shtml"
+## [38] "/players/a/alvarjo03.shtml"
+## [39] "/players/a/alvarda01.shtml"
+## [40] "/players/a/alvarhe01.shtml"
+## [41] "/players/a/alvarjo02.shtml"
+## [42] "/players/a/alvarpe01.shtml"
+## [43] "/players/a/alvarrj01.shtml"
+## [44] "/players/a/ambrihe01.shtml"
+## [45] "/players/a/anderbr04.shtml"
+## [46] "/players/a/anderbr06.shtml"
+## [47] "/players/a/anderch01.shtml"
+## [48] "/players/a/anderco01.shtml"
+## [49] "/players/a/anderdr02.shtml"
+## [50] "/players/a/anderju01.shtml"
+## [51] "/players/a/anderta01.shtml"
+## [52] "/players/a/anderti01.shtml"
+## [53] "/players/a/anderty01.shtml"
+## [54] "/players/a/andrejo03.shtml"
+## [55] "/players/a/andrima01.shtml"
+## [56] "/players/a/andruel01.shtml"
+## [57] "/players/a/andujmi01.shtml"
+## [58] "/players/a/aquinar01.shtml"
+## [59] "/players/a/aranovi01.shtml"
+## [60] "/players/a/araujpe01.shtml"
+## [61] "/players/a/archech01.shtml"
+## [62] "/players/a/arciafr01.shtml"
+## [63] "/players/a/arciaor01.shtml"
+## [64] "/players/a/arenano01.shtml"
+## [65] "/players/a/armstsh01.shtml"
+## [66] "/players/a/arrieja01.shtml"
+## [67] "/players/a/arroych01.shtml"
+## [68] "/players/a/ascheco01.shtml"
+## [69] "/players/v/valdelu01.shtml"
+## [70] "/players/a/asheral01.shtml"
+## [71] "/players/a/astudwi01.shtml"
+## [72] "/players/a/asuajca01.shtml"
+## [73] "/players/a/austity01.shtml"
+## [74] "/players/a/aveliab01.shtml"
+## [75] "/players/a/avilaal01.shtml"
+## [76] "/players/a/avilalu01.shtml"
+## [77] "/players/a/axforjo01.shtml"
+## [78] "/players/a/aybarer01.shtml"
 ```
 
+---
+class:inverse
 ## Your Turn
 
-Use the [SelectorGadget](javascript:(function(){var%20s=document.createElement('div');s.innerHTML='Loading...';s.style.color='black';s.style.padding='20px';s.style.position='fixed';s.style.zIndex='9999';s.style.fontSize='3.0em';s.style.border='2px%20solid%20black';s.style.right='40px';s.style.top='40px';s.setAttribute('class','selector_gadget_loading');s.style.background='white';document.body.appendChild(s);s=document.createElement('script');s.setAttribute('type','text/javascript');s.setAttribute('src','http://www.selectorgadget.com/stable/lib/selectorgadget.js?raw=true');document.body.appendChild(s);})();) on the website for [David Aardsma](http://www.baseball-reference.com/players/a/aardsda01.shtml)
+Use the SelectorGadget on the website for [David Aardsma](http://www.baseball-reference.com/players/a/aardsda01.shtml)
 
-Find the css description to extract his career statistics and load them into your R session.
+Find the css selector to extract his career statistics and load them into your R session.
 
 Does the same code work to extract career statistics for (some of) the other players?
 
 What other information do we need to know? - and how can we get to that?
+
+---
 
 ## Your Turn  - Solution
 
@@ -1182,6 +1185,8 @@ html %&gt;% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullo
 ##  [8] "337.0" "340"   "1.421"
 ```
 
+---
+
 ## Your Turn  - Solution (cont'd)
 
 Now apply to other players (with 'a' as starting letter) - first we get everything tidied up in a dataset
@@ -1190,56 +1195,62 @@ Now apply to other players (with 'a' as starting letter) - first we get everythi
 ```r
 url &lt;- "http://www.baseball-reference.com/players/a/"
 html &lt;- read_html(url)
-players &lt;- html %&gt;% html_nodes("b a") %&gt;% html_text()
-links &lt;- html %&gt;% html_nodes("b a") %&gt;% html_attr(name="href")
+players &lt;- html %&gt;% html_nodes("strong a") %&gt;% html_text()
+links &lt;- html %&gt;% html_nodes("strong a") %&gt;% html_attr(name="href")
 
-bb &lt;- data.frame(players=players, links = links)
+bb &lt;- tibble(players=players, links = links)
 ```
 
+---
 
 ## Your Turn  - Solution (cont'd)
 
 second, we follow the links to get to career statistics:
   
-  
-  ```r
-  getStats &lt;- function(link) {
+
+```r
+getStats &lt;- function(players, links) {
   s &lt;- html_session("http://www.baseball-reference.com")
-  s &lt;- s %&gt;% jump_to(link)
+  s &lt;- s %&gt;% jump_to(links)
   html &lt;- read_html(s)
   type &lt;- html %&gt;% html_nodes(".stats_pullout .poptip") %&gt;% html_text() 
   values &lt;- html %&gt;% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %&gt;% html_text()
   what &lt;- html %&gt;% html_nodes(".stats_pullout strong") %&gt;% html_text()
-  df &lt;- data.frame(type=rep(type, each=length(what)), values=values, what = rep(what, length(values)))
+  df &lt;- tibble(player = players, link = links, type=rep(type, each=length(what)), values=values, what = rep(what, length(values)/2))
   df
-  }
-  
-  bbhead &lt;- bb[1:5,] %&gt;% mutate(
-  career = links %&gt;% purrr::map(getStats)
-  ) 
-  bbhead[,c("players", "career")]
-  ```
-  
-  ```
-  ##         players
-  ## 1 Fernando Abad
-  ## 2    Jose Abreu
-  ## 3 Dustin Ackley
-  ## 4  Manny Acosta
-  ## 5  Ronald Acuna
-  ##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       career
-  ## 1                                                                                                                                                                                                                                                                                                                                                                                                                                              9, 8, 5, 1, 2, 3, 7, 4, 6, 10, 15, 20, 13, 16, 18, 19, 12, 17, 14, 11, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21
-  ## 2 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 21, 26, 32, 29, 23, 36, 28, 25, 13, 14, 33, 30, 34, 31, 27, 35, 15, 16, 17, 18, 19, 20, 22, 24, 21, 26, 32, 29, 23, 36, 28, 25, 13, 14, 33, 30, 34, 31, 27, 35, 15, 16, 17, 18, 19, 20, 22, 24, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38, 37, 38
-  ## 3                                                                                                                                                                                                                                                                                                                                                                                                                      12, 1, 3, 4, 2, 8, 9, 10, 5, 11, 6, 7, 23, 17, 22, 21, 13, 19, 18, 20, 14, 15, 16, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25
-  ## 4                                                                                                                                                                                                                                                                                                                                                                                                                                              9, 8, 5, 1, 2, 3, 7, 4, 6, 10, 12, 14, 14, 18, 16, 11, 19, 17, 15, 13, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
-  ## 5 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 12, 12, 1, 1, 3, 3, 4, 4, 2, 2, 8, 8, 9, 9, 10, 10, 5, 5, 11, 11, 6, 6, 7, 7, 21, 21, 22, 22, 17, 17, 20, 20, 13, 13, 24, 24, 23, 23, 19, 19, 14, 14, 15, 15, 16, 16, 18, 18, 21, 21, 22, 22, 17, 17, 20, 20, 13, 13, 24, 24, 23, 23, 19, 19, 14, 14, 15, 15, 16, 16, 18, 18, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26
-  ```
+}
+
+bbhead &lt;- bb[1:5,] %&gt;% purrr::pmap_df(getStats)
+```
+
+---
 
 ## Your Turn  - Solution (cont'd)
 
 We also need to know the position a player has ...
 
 This information has the css path "#meta p:nth-child(2)"
+
+  
+
+```r
+getStats &lt;- function(players, links) {
+  s &lt;- html_session("http://www.baseball-reference.com")
+  s &lt;- s %&gt;% jump_to(links)
+  html &lt;- read_html(s)
+  type &lt;- html %&gt;% html_nodes(".stats_pullout .poptip") %&gt;% html_text() 
+  values &lt;- html %&gt;% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %&gt;% html_text()
+  what &lt;- html %&gt;% html_nodes(".stats_pullout strong") %&gt;% html_text()
+  position &lt;- html %&gt;% html_nodes("#meta p:nth-child(2)") %&gt;% html_text(trim = T) %&gt;%
+    gsub("Position:\\n", "", x = .) %&gt;% str_trim()
+  df &lt;- tibble(player = players, link = links, position = position, 
+               type=rep(type, each=length(what)), values=values, 
+               what = rep(what, length(values)/2))
+  df
+}
+
+bbhead &lt;- bb[1:5,] %&gt;% purrr::pmap_df(getStats)
+```
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
