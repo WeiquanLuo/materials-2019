@@ -39,7 +39,7 @@ class: inverse
 
 <br> <br> <br>
 
-The bar catches fires, explodes and kills everyone 💥💥💥
+The bar catches fires, explodes and kills everyone ????????????
 
 ---
 
@@ -79,19 +79,19 @@ oz %>%
 
 ---
 
-# Why do we do this to you?
+## Why do we do this to you?
 
 - expectation: all of the previous checks work without problems.
 As always, when you encounter a problem, make a note of it and put it into the Readme file. 
 
 - this lab is a technical test run for the final project
 
-- new due date: Suntoday,r 31 25 p1:59
+- new due date: tonight, 11:59pm
 
 
 ---
 
-# Final project
+## Final project
 
 submit topic for the final project by Wednesday Mar 27.
 
