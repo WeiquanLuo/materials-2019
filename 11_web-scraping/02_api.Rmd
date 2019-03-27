@@ -153,8 +153,9 @@ ames_dog_df
 
 ## Your Turn Solutions
 
-```{r, fig.show = 'all'}
+```{r, fig.show = 'all', out.width="10%"}
 purrr::map_chr(ames_dog_df$pics, magrittr::extract2, 1) %>% 
+  str_remove("&width=60&-pnt.jpg") %>%
   knitr::include_graphics()
 ```
 
