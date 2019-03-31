@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lab Assignment #3 - Recap</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Heike Hofmann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lab Assignment #3 - Recap
+### Heike Hofmann
+
+---
+
+class: inverse, middle, center
+
+# A systems engineer walks into a bar ...
+
+---
+class: inverse
+# ... 
+
+- he orders a beer
+
+- he orders 9,999,999 beers
+
+- he orders -1 beers
+
+- he orders C5F63A beers
+
+- he orders a lizard
+
+---
+class: inverse
+# the first real customer enters the bar
+
+... and asks where the bathroom is.
+
+--
+
+&lt;br&gt; &lt;br&gt; &lt;br&gt;
+
+The bar catches fires, explodes and kills everyone ????????????
+
+---
+
+# Submission
+
+- something went wrong with Canvas submissions - groups were permuted??
+
+- please submit your team submission again under `Lab 3 2nd attempt`
+
+
+---
+
+# What we will do to your package
+
+1. download repo from github 
+
+2. install and run checks 
+
+3. run your defined tests: `devtools::test()`
+
+4. run an example:
+
+
+```r
+library(tidyverse)
+library(pkg_name)
+oz &lt;- team_X("gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz %&gt;% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = NAME_1))
+```
+
+5. run your examples (I will come back to that)
+
+6. visit the package's website at https://team_member.github.io/pkg_name/
+
+6. run some of our checks 
+
+---
+
+## Why do we do this to you?
+
+- expectation: all of the previous checks work without problems.
+As always, when you encounter a problem, make a note of it and put it into the Readme file. 
+
+- this lab is a technical test run for the final project
+
+- new due date: tonight, 11:59pm
+
+
+---
+
+## Final project
+
+submit topic for the final project by Wednesday Mar 27.
+
+
+---
+
+# Your examples
+
+Where to place the data for your example?
+
+For your example you will need a set of five files: cpg, dbf, prj, shp, and shx
+
+Non-R data are being placed in the folder `inst`
+
+During the installation all elements of `inst` are placed in a special location on your machine.
+
+For example, to find `inst/extdata/mydata.csv`, you'd call `system.file("extdata", "mydata.csv", package = "mypackage")`
+
+---
+
+# Example of an example
+
+Assume you have the australia files in a folder called `extdata` in folder `inst`
+
+The example then should be:
+
+```r
+ozfilepath &lt;- system.file("extdata/gadm36_AUS_1.shp", ".shp", package = "mypackage")
+ozdata &lt;- team_X(ozfilepath, tolerance=0.1)
+```
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

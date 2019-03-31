@@ -1,0 +1,123 @@
+---
+title: 'Lab Assignment #3 - Recap'
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse, middle, center
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE, echo = TRUE)
+```
+# A systems engineer walks into a bar ...
+
+---
+class: inverse
+# ... 
+
+- he orders a beer
+
+- he orders 9,999,999 beers
+
+- he orders -1 beers
+
+- he orders C5F63A beers
+
+- he orders a lizard
+
+---
+class: inverse
+# the first real customer enters the bar
+
+... and asks where the bathroom is.
+
+--
+
+<br> <br> <br>
+
+The bar catches fires, explodes and kills everyone ????????????
+
+---
+
+# Submission
+
+- something went wrong with Canvas submissions - groups were permuted??
+
+- please submit your team submission again under `Lab 3 2nd attempt`
+
+
+---
+
+# What we will do to your package
+
+1. download repo from github 
+
+2. install and run checks 
+
+3. run your defined tests: `devtools::test()`
+
+4. run an example:
+
+```{r eval = FALSE}
+library(tidyverse)
+library(pkg_name)
+oz <- team_X("gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz %>% 
+  ggplot(aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = NAME_1))
+```
+
+5. run your examples (I will come back to that)
+
+6. visit the package's website at https://team_member.github.io/pkg_name/
+
+6. run some of our checks 
+
+---
+
+## Why do we do this to you?
+
+- expectation: all of the previous checks work without problems.
+As always, when you encounter a problem, make a note of it and put it into the Readme file. 
+
+- this lab is a technical test run for the final project
+
+- new due date: tonight, 11:59pm
+
+
+---
+
+## Final project
+
+submit topic for the final project by Wednesday Mar 27.
+
+
+---
+
+# Your examples
+
+Where to place the data for your example?
+
+For your example you will need a set of five files: cpg, dbf, prj, shp, and shx
+
+Non-R data are being placed in the folder `inst`
+
+During the installation all elements of `inst` are placed in a special location on your machine.
+
+For example, to find `inst/extdata/mydata.csv`, you'd call `system.file("extdata", "mydata.csv", package = "mypackage")`
+
+---
+
+# Example of an example
+
+Assume you have the australia files in a folder called `extdata` in folder `inst`
+
+The example then should be:
+```{r eval=FALSE}
+ozfilepath <- system.file("extdata/gadm36_AUS_1.shp", ".shp", package = "mypackage")
+ozdata <- team_X(ozfilepath, tolerance=0.1)
+```

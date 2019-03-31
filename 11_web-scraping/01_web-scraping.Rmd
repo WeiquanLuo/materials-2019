@@ -73,8 +73,11 @@ class:inverse
 Connect to the website of the NY Times election results at http://www.nytimes.com/elections/results/
   
 - Pick your favorite state (by clicking on the state on the map)
+
 - Use `rvest` to download the election results for the 2016 Presidential Election for all counties of your state.
+
 - Clean up the data (numbers should be numbers).
+
 - Convert the numbers into row-wise percentages (decide on either %Republican or %Democrat).
 
 ---
@@ -144,9 +147,13 @@ Sometimes data on the web is not structured as nicely... e.g. let's assume we wa
 ## SelectorGadget
 
 - SelectorGadget is a javascript bookmarklet to determine the css selectors of pieces of a website we want to extract.
+
 - Bookmark the [SelectorGadget](https://selectorgadget.com/) link, then click on it to use it (or add the chrome extension)
+
 - When SelectorGadget is active, pieces of the website are highlighted in orange/green/red.
+
 - Use SelectorGadget on http://www.baseball-reference.com/players/ .
+
 - Read more details on `vignette("selectorgadget")`
 
 If you prefer, you can also read the HTML code and create your own [CSS](https://www.w3schools.com/cssref/css_selectors.asp) or [XPATH](https://www.w3schools.com/xml/xpath_syntax.asp) selectors. 
@@ -168,6 +175,7 @@ html %>% html_nodes("strong a") %>% html_text()
 We are, in fact, not just interested in the *names of the players*, but also in the *links* to each player's website
 
 - `html_attr` let's us access an attribute of an html node
+
 - `html_attrs` extracts all attributes of an html node
 
 ```{r}
@@ -221,7 +229,7 @@ second, we follow the links to get to career statistics:
 ```{r}
 getStats <- function(players, links) {
   s <- html_session("http://www.baseball-reference.com")
-  s <- s %>% jump_to(link)
+  s <- s %>% jump_to(links)
   html <- read_html(s)
   type <- html %>% html_nodes(".stats_pullout .poptip") %>% html_text() 
   values <- html %>% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %>% html_text()
@@ -245,7 +253,7 @@ This information has the css path "#meta p:nth-child(2)"
 ```{r}
 getStats <- function(players, links) {
   s <- html_session("http://www.baseball-reference.com")
-  s <- s %>% jump_to(link)
+  s <- s %>% jump_to(links)
   html <- read_html(s)
   type <- html %>% html_nodes(".stats_pullout .poptip") %>% html_text() 
   values <- html %>% html_nodes(".stats_pullout .p1 p, .stats_pullout .p2 p, .stats_pullout .p3 p") %>% html_text()
