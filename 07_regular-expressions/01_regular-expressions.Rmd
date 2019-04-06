@@ -1,0 +1,186 @@
+---
+title: "Stat 585 - String Manipulation"
+author: "Heike Hofmann and Susan Vanderplas"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts, "tweaks.css"]
+    nature:
+      beforeInit: "macros.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE, message=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, dpi= 300)
+options(width=60)
+library(tidyverse)
+```
+
+
+## Working with strings
+  
+#### Basic operations:
+
+- separate a string into pieces
+
+- paste strings together
+
+- locate a search expression in a string
+    - does it exist
+    - at what position?
+
+- remove or replace parts of a string
+
+- change format: uppercase, lowercase, etc.
+
+---
+
+## Tidyverse packages
+
+.move-up[.move-up[.right-column[
+`stringr`
+- Tidyverse package for string manipulation
+- basic function:     
+`str_xxx(input_string, other_args)`
+- `str_replace`, `str_detect`, `str_extract`, `str_locate`, `str_trim`, `str_to_upper`...
+
+`glue`
+- Advanced string formatting (like `sprintf`)
+- R code inserted into `{   }` within the string
+```{r eval = F}
+name <- "Fred"
+age <- 50
+glue('My name is {name},',
+     'my age next year is {age + 1}')
+```
+]]]
+
+```{r, out.width = "50%", out.extra='class="left-column move-down"', echo = F}
+knitr::include_graphics(c(system.file("help/figures/logo.png", package = "stringr"), 
+                          system.file("help/figures/logo.png", package = "glue")))
+```
+
+---
+class:inverse
+## Your Turn
+
+http://bit.ly/585-passwords contains a 100K sample from a database of leaked passwords. 
+
+Use `readLines` to read the passwords into a character vector. 
+
+Using functions from `stringr`, answer the following questions:
+
+- How many of the passwords have at least one space?
+
+- What is the most common character in a password?
+
+- What proportion of the passwords have `.`, `?`, and `!` characters?    
+Hint: Use "\\" before the character to escape "special" characters - we'll talk about those next.
+
+
+---
+
+## Your Turn Solutions
+
+```{r}
+library(stringr)
+passwords <- readLines("http://bit.ly/585-passwords")
+
+str_detect(passwords, " ") %>% sum()
+
+# Get single characters
+str_split(passwords, '', simplify = F) %>%
+  # get rid of lists for each character
+  unlist() %>% 
+  table() %>% 
+  sort(decreasing = T) %>%
+  magrittr::extract(1)
+
+pds <- str_detect(passwords, "\\.")
+qmk <- str_detect(passwords, "\\?")
+exc <- str_detect(passwords, "!")
+sum(pds | qmk | exc)
+```
+
+---
+
+
+## Regular Expressions
+
+
+.center[![:scale 70%](https://imgs.xkcd.com/comics/regular_expressions.png)]
+
+
+---
+
+## Regular Expressions
+
+- Patterns to describe text
+
+Basic rules:
+
+  - Use `[]` to enclose a set of valid characters or a range of characters    
+  e.g. `[A-z]` matches all letters, `[ATCG]` matches DNA bases
+  
+  - `.` matches anything
+  
+  - `[]{n, m}` will match a sequence of n to m characters in the set:
+  e.g. `[abc]{0, 3}` will match `a`, `bc`, `abc`, `bca`, `''`, but not `xz3`
+  
+  - `^` negates a selection (inside of the square brackets)    
+  e.g. `[^A-z]` matches anything that isn't a letter
+
+
+---
+
+## Regular Expressions
+
+```{r}
+test_str <- "Hello World!"
+str_extract_all(test_str, "[A-z]{1,}")
+
+str_extract_all(test_str, "[^A-z]{1,}")
+str_remove_all(test_str, "[^A-z]")
+
+str_extract_all(test_str, ".")
+```
+
+---
+
+## Chaining Regular Expressions
+
+Patterns can be combined:
+
+```{r}
+test_str <- "Hello World!"
+str_extract_all(test_str, "[aeiou].")
+str_extract_all(test_str, "[^aeiou]{1,}[a-z]")
+str_extract_all(test_str, "[A-z]{3}[^A-z]")
+```
+
+---
+
+## Extended Regular Expressions
+
+- Special characters: `. \ | ( ) [ { ^ $ * + ?`
+
+- `\w`: `[A-z0-9_]` (alphanumeric characters), `\W` for the negation
+
+- `\d`: `[0-9]` (digits), `\D` matches non-digits
+
+- `\x`: Hexadecimal numbers
+
+- `\s`: white space (tab, space, endline), `\S` for non-whitespace
+
+- `\b`: empty string at the beginning or end of a word (`\B` for the negation)
+
+---
+
+## Capture Groups
+
+- To "save" an expression (e.g. to use find/replace), enclose something in `()`
+
+```{r}
+
+```
