@@ -126,6 +126,11 @@ sum(pds | qmk | exc)
 
 - [Regex Buddy](http://www.regexbuddy.com/cgi-bin/affref.pl?aff=jatwood) - test your regular expressions
 
+- [RegExplain](https://www.garrickadenbuie.com/project/regexplain/) package and RStudio addin
+```{r eval = F}
+devtools::install_github("gadenbuie/regexplain")
+```
+
 --
 
 - When all else fails, google "regular expression for xxx" and chances are pretty good you'll find something
@@ -194,6 +199,15 @@ str_remove_all(test_str, "[^A-z]")
 
 str_extract_all(test_str, ".")
 ```
+
+---
+
+## Regular Expression Problems
+
+![:scale 100%](https://imgs.xkcd.com/comics/perl_problems.png)
+
+Perl is a language with extensive regular expression capabilities.    
+You can use Perl-style regular expressions in base R functions, but they don't work with `stringr`.
 
 ---
 class:inverse
@@ -375,4 +389,75 @@ str_replace(name, "^(\\S{1,}).*(\\S{1,})$", "\\1 \\2")
 
 # We need lazy evaluation
 str_replace(name, "^(\\S{1,}).*?(\\S{1,})$", "\\1 \\2")
+```
+
+---
+
+## Capture Groups and `tidyr`
+
+`tidyr` has a function, `extract`, which allows you to turn a single column into multiple columns
+
+`extract(data, col, into, regex = "([[:alnum:]]+)", remove = TRUE, convert = FALSE, ...)`
+
+- `col` is the column the data is currently in
+
+- `into` is a character vector with names of the new variables
+
+- `regex` a regex with capture groups
+
+---
+class:inverse
+## Your Turn
+
+```{r}
+library(xml2)
+url <- "https://commons.wikimedia.org/wiki/Category:Panoramic_photographs"
+html <- readLines(url) %>% paste(collapse = " ")
+panoramic_pics <- tibble(orightml = str_extract_all(html, "<div class=.gallerytext.>.*?</div>") %>% unlist())
+panoramic_pics$orightml[1]
+```
+
+Use `tidyr::extract()` to create separate columns for the file link\*, image dimensions, and the image size. Can you find the widest panoramic image? Get the image url and plot it using magick or `knitr::include_graphics()` if you're working in Rmarkdown.
+
+* Hint: Paste "https://commons.wikimedia.org" on to the front to make the link work
+
+---
+
+## Your Turn Solutions
+
+```{r}
+linkregex <- "href=.(\\S{1,}). " # using . to match quotes saves a lot of pain...
+imgdims <- "([\\d,]{1,} × [\\d,]{1,})" # Note  ×  is not the same as x... grr.
+imgsize <- "([\\d\\.]{1,} [MKGmkg]?[Bb])"
+
+base_url <- "https://commons.wikimedia.org"
+panoramic_pics <- panoramic_pics %>%
+  tidyr::extract(orightml, into = c("link", "dim", "size"),
+                 regex = paste0(".*?", linkregex, ".*?", imgdims, "; ", imgsize, ".*$"),
+                 remove = F) %>%
+  mutate(link = paste0(base_url, link), 
+         im_width = str_extract(dim, "^[\\d,]{1,}") %>% parse_number(),
+         im_height = str_extract(dim, "[\\d,]{1,}$") %>% parse_number())
+```
+
+
+---
+
+## Your Turn Solutions
+```{r}
+page_url <- panoramic_pics %>%
+  arrange(desc(im_width)) %>%
+  filter(row_number() == 1) %>%
+  magrittr::extract2("link")
+
+img_url <- page_url %>%
+  readLines() %>% paste(collapse = " ") %>%
+  # Get the correct tag
+  str_extract("<a [^>]{1,}>Original file</a>") %>%
+  # Get the link out of the tag
+  str_extract("https\\S{1,}") %>%
+  # Remove the last quote
+  str_remove("\\\"$")
+
+knitr::include_graphics(img_url)
 ```

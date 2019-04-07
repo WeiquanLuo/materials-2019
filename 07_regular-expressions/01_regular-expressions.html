@@ -48,7 +48,7 @@ class: center, middle, inverse, title-slide
 - `str_replace`, `str_detect`, `str_extract`, `str_locate`, `str_trim`, `str_to_upper`...
 ]
 
-&lt;img src="/home/susan/R/x86_64-pc-linux-gnu-library/3.5/stringr/help/figures/logo.png" width="50%" class="left-column move-down" /&gt;
+&lt;img src="/home/srvander/R/x86_64-pc-linux-gnu-library/3.5/stringr/help/figures/logo.png" width="50%" class="left-column move-down" /&gt;
 
 ---
 class:inverse
@@ -271,6 +271,15 @@ str_extract_all(test_str, ".")
 ## [[1]]
 ##  [1] "H" "e" "l" "l" "o" " " "W" "o" "r" "l" "d" "!"
 ```
+
+---
+
+## Regular Expression Problems
+
+![:scale 100%](https://imgs.xkcd.com/comics/perl_problems.png)
+
+Perl is a language with extensive regular expression capabilities.    
+You can use Perl-style regular expressions in base R functions, but they don't work with `stringr`.
 
 ---
 class:inverse
@@ -575,6 +584,86 @@ str_replace(name, "^(\\S{1,}).*?(\\S{1,})$", "\\1 \\2")
 ```
 ## [1] "John Schmidt"
 ```
+
+---
+
+## Capture Groups and `tidyr`
+
+`tidyr` has a function, `extract`, which allows you to turn a single column into multiple columns
+
+`extract(data, col, into, regex = "([[:alnum:]]+)", remove = TRUE, convert = FALSE, ...)`
+
+- `col` is the column the data is currently in
+
+- `into` is a character vector with names of the new variables
+
+- `regex` a regex with capture groups
+
+---
+class:inverse
+## Your Turn
+
+
+```r
+library(xml2)
+url &lt;- "https://commons.wikimedia.org/wiki/Category:Panoramic_photographs"
+html &lt;- readLines(url) %&gt;% paste(collapse = " ")
+panoramic_pics &lt;- tibble(orightml = str_extract_all(html, "&lt;div class=.gallerytext.&gt;.*?&lt;/div&gt;") %&gt;% unlist())
+panoramic_pics$orightml[1]
+```
+
+```
+## [1] "&lt;div class=\"gallerytext\"&gt; &lt;a href=\"/wiki/File:2013_Rummelsberg_Blick_vom_Kreuz.jpg\" class=\"galleryfilename galleryfilename-truncate\" title=\"File:2013 Rummelsberg Blick vom Kreuz.jpg\"&gt;2013 Rummelsberg Blick vom Kreuz.jpg&lt;/a&gt; 9,844 × 1,862; 2.96 MB&lt;br /&gt;  \t\t\t&lt;/div&gt;"
+```
+
+Use `tidyr::extract()` to create separate columns for the file link\*, image dimensions, and the image size. Can you find the widest panoramic image? Get the image url and plot it using magick or `knitr::include_graphics()` if you're working in Rmarkdown.
+
+* Hint: Paste "https://commons.wikimedia.org" on to the front to make the link work
+
+---
+
+## Your Turn Solutions
+
+
+```r
+linkregex &lt;- "href=.(\\S{1,}). " # using . to match quotes saves a lot of pain...
+imgdims &lt;- "([\\d,]{1,} × [\\d,]{1,})" # Note  ×  is not the same as x... grr.
+imgsize &lt;- "([\\d\\.]{1,} [MKGmkg]?[Bb])"
+
+base_url &lt;- "https://commons.wikimedia.org"
+panoramic_pics &lt;- panoramic_pics %&gt;%
+  tidyr::extract(orightml, into = c("link", "dim", "size"),
+                 regex = paste0(".*?", linkregex, ".*?", imgdims, "; ", imgsize, ".*$"),
+                 remove = F) %&gt;%
+  mutate(link = paste0(base_url, link), 
+         im_width = str_extract(dim, "^[\\d,]{1,}") %&gt;% parse_number(),
+         im_height = str_extract(dim, "[\\d,]{1,}$") %&gt;% parse_number())
+```
+
+
+---
+
+## Your Turn Solutions
+
+```r
+page_url &lt;- panoramic_pics %&gt;%
+  arrange(desc(im_width)) %&gt;%
+  filter(row_number() == 1) %&gt;%
+  magrittr::extract2("link")
+
+img_url &lt;- page_url %&gt;%
+  readLines() %&gt;% paste(collapse = " ") %&gt;%
+  # Get the correct tag
+  str_extract("&lt;a [^&gt;]{1,}&gt;Original file&lt;/a&gt;") %&gt;%
+  # Get the link out of the tag
+  str_extract("https\\S{1,}") %&gt;%
+  # Remove the last quote
+  str_remove("\\\"$")
+
+knitr::include_graphics(img_url)
+```
+
+![](https://upload.wikimedia.org/wikipedia/commons/6/6e/Pano_Paris.jpg)&lt;!-- --&gt;
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
