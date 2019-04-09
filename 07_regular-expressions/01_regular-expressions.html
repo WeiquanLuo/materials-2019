@@ -43,13 +43,18 @@ class: center, middle, inverse, title-slide
 .right-column[
 `stringr`
 - Tidyverse package for string manipulation
+
 - basic function:     
 `str_xxx(input_string, other_args)`
+
 - `str_replace`, `str_detect`, `str_extract`, `str_locate`, `str_trim`, `str_to_upper`...
 ]
 
-&lt;img src="/home/srvander/R/x86_64-pc-linux-gnu-library/3.5/stringr/help/figures/logo.png" width="50%" class="left-column move-down" /&gt;
+&lt;img src="/Library/Frameworks/R.framework/Versions/3.5/Resources/library/stringr/help/figures/logo.png" width="50%" class="left-column move-down" /&gt;
 
+Good set of resources: http://stringr.tidyverse.org
+
+Cheat sheet: https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
 ---
 class:inverse
 ## Your Turn
@@ -123,17 +128,17 @@ str_split(passwords, '', simplify = F) %&gt;%
 ##    14    12     9     8     8     7     6     5     5     5 
 ##  \xf6     }     ç  \xfc     à     Ñ     ป  \xdf     ♣     ๘ 
 ##     5     4     4     4     3     3     3     3     2     2 
-##     ó     ฟ     ภ     ภึ     ย     ร     อ     เ  \xe4  \xe9 
+##     ó     ฟ     ภ     ภึ     ย     ร     อ     เ  \xe9  \xf4 
 ##     2     2     2     2     2     2     2     2     2     2 
-##  \xe1  \xf4  \xe2    \b     ¡     ´     á     å     Å     ä 
+##  \xe2  \xe1  \xe4    \b     ¡     ´     á     å     Å     ä 
 ##     2     2     2     1     1     1     1     1     1     1 
 ##     í     İ     ô     ő     ø     ü    กำ     คุ     ง     ต 
 ##     1     1     1     1     1     1     1     1     1     1 
 ##     ถุึ     ท     นื     ผ     ฟื     ม     ส     า      ุ     แ 
 ##     1     1     1     1     1     1     1     1     1     1 
-##     ๅุ    䬳  \xfe  \xf1  \xe6  \xdc  \xf0  \xde  \xcd  \xfb 
+##     ๅุ    䬳  \xcd  \xde  \xfb  \xf3  \xdc  \xfe  \xf0  \xe6 
 ##     1     1     1     1     1     1     1     1     1     1 
-##  \xf3 
+##  \xf1 
 ##     1
 ```
 
@@ -175,6 +180,12 @@ sum(pds | qmk | exc)
 - [Quick Start Guide](https://www.regular-expressions.info/quickstart.html)
 
 - [Regex Buddy](http://www.regexbuddy.com/cgi-bin/affref.pl?aff=jatwood) - test your regular expressions
+
+- [RegExplain](https://www.garrickadenbuie.com/project/regexplain/) package and RStudio addin
+
+```r
+devtools::install_github("gadenbuie/regexplain")
+```
 
 --
 
@@ -296,7 +307,6 @@ Using functions from `stringr` and regular expressions, answer the following que
 - How many of the passwords have at least one space, `-`, or `_`?
 
 - What proportion of the passwords have `.`, `?`, and `!` characters?    
-Hint: Use "\\" before the character to escape "special" characters - we'll talk about those next.
 
 - What proportion of the passwords have only lowercase letters?
 

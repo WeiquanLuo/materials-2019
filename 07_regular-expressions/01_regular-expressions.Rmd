@@ -41,8 +41,10 @@ library(tidyverse)
 .right-column[
 `stringr`
 - Tidyverse package for string manipulation
+
 - basic function:     
 `str_xxx(input_string, other_args)`
+
 - `str_replace`, `str_detect`, `str_extract`, `str_locate`, `str_trim`, `str_to_upper`...
 ]
 
@@ -50,6 +52,9 @@ library(tidyverse)
 knitr::include_graphics(system.file("help/figures/logo.png", package = "stringr"))
 ```
 
+Good set of resources: http://stringr.tidyverse.org
+
+Cheat sheet: https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
 ---
 class:inverse
 ## Your Turn
@@ -223,7 +228,6 @@ Using functions from `stringr` and regular expressions, answer the following que
 - How many of the passwords have at least one space, `-`, or `_`?
 
 - What proportion of the passwords have `.`, `?`, and `!` characters?    
-Hint: Use "\\" before the character to escape "special" characters - we'll talk about those next.
 
 - What proportion of the passwords have only lowercase letters?
 
