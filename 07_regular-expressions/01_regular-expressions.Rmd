@@ -34,6 +34,10 @@ library(tidyverse)
 
 - change format: uppercase, lowercase, etc.
 
+???
+
+Basic things you might want to do with strings - chop it up, paste it together, search for something, change something
+
 ---
 
 ## Tidyverse packages
@@ -58,6 +62,14 @@ file.copy(system.file("help/figures/logo.png", package = "stringr"), here::here(
 knitr::include_graphics("stringr.png")
 ```
 
+???
+
+stringr is a tidyverse package for working with strings. Base R has lots of string functionality, but the nicest thing about stringr is that the arguments are in a predictable order, unlike base R functions.
+
+The input string is first, other arguments follow. So for str_replace, you'd pass in the input string, the "pattern" - what you want to replace, and the replacement. For str_trim, you pass in the input string and it will get rid of whitespace at the beginning and end. Many of these functions use similar arguments, so in general you can use help and/or tab completion to get a good idea of what arguments you need - the functions more or less are named what you'd expect them to be. 
+
+We're going to start out with basic find/replace/count tasks you might do in a text editor. 
+
 ---
 class:inverse
 ## Your Turn
@@ -81,6 +93,11 @@ Using functions from `stringr`, answer the following questions:
 - What proportion of the passwords have `.`, `?`, and `!` characters?    
 Hint: Use "\\\\" before the character to escape "special" characters - we'll talk about those next.
 
+???
+
+Play around with stringr functions and see if you can complete the following tasks. To do this, I've uploaded a relatively small sample from a database of passwords exposed during security breaches. See if you can have some fun using stringr functions to examine people's passwords. 
+
+With string patterns, you do have to escape special characters like period and question mark. We'll talk about why those are special in a minute - for now, use two slashes to escape them.
 
 ---
 
@@ -125,6 +142,13 @@ sum(pds | qmk | exc)
 
 
 .center[![:scale 70%](https://imgs.xkcd.com/comics/regular_expressions.png)]
+
+???
+
+In the tasks I just asked you to do, you didn't really need wildcards or other complicated search patterns. The 
+
+Anyone else relate to this? Regular expressions have made my life easier many times, but I don't know that they've ever been superhero-worthy. 
+
 
 
 ---
