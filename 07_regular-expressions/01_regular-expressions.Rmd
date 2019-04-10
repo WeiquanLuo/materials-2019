@@ -53,8 +53,9 @@ Good set of resources: http://stringr.tidyverse.org
 Cheat sheet: https://github.com/rstudio/cheatsheets/blob/master/strings.pdf
 ]
 
-```{r, out.width = "50%", out.extra='class="left-column move-down"', echo = F}
-knitr::include_graphics(system.file("help/figures/logo.png", package = "stringr"))
+```{r, out.width = "50%", out.extra='class="left-column move-down"', echo = F, eval = -1}
+file.copy(system.file("help/figures/logo.png", package = "stringr"), here::here("07_regular-expressions/stringr.png"))
+knitr::include_graphics("stringr.png")
 ```
 
 ---
@@ -63,11 +64,14 @@ class:inverse
 
 http://bit.ly/585-passwords contains a 100K sample from a database of leaked passwords. 
 
-```{r}
+```{r, eval = F}
 library(stringr)
 passwords <- readLines("http://bit.ly/585-passwords")
 ```
-
+```{r, echo = F}
+library(stringr)
+passwords <- readLines("https://raw.githubusercontent.com/Stat585-at-ISU/materials-2019/master/07_regular-expressions/passwords.txt")
+```
 Using functions from `stringr`, answer the following questions:
 
 - How many of the passwords have at least one space?
