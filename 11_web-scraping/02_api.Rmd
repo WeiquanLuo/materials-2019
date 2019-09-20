@@ -94,7 +94,7 @@ library(rvest)
 ```{r, eval = -1}
 library(rvest)
 key <- "key=7fdd14996c2133c74184f71e087ddf19" # Get your own if you want to try this yourself
-base_url <- "http://api.petfinder.com/"
+base_url <- "http://api.petfinder.com/" 
 method <- "pet.find"
 query <- "animal=dog&location=50010"
 url <- sprintf("%s%s?%s&%s", base_url, method, key, query)

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Stat 585 - Project Expectations</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Heike Hofmann and Susan Vanderplas" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="tweaks.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Stat 585 - Project Expectations
+### Heike Hofmann and Susan Vanderplas
+
+---
+
+
+
+
+## Package: Basic Requirements
+
+[Link to Rubric](https://stat585-at-isu.github.io/project-rubric.html)
+
+- 5 functions
+
+- Shiny app to show off the package
+
+- a website (e.g. `pkgdown`) describing the functions and how the package is used
+
+- a readme page: installation instructions + basic demo
+
+- a package vignette (8-10 pages)
+
+- tests for your package
+
+---
+## Package: Full points requirements
+
+- Package is useful and coherent, addresses a well-defined problem
+
+- Package builds and installs correctly    
+This includes passing `devtools::check()`!
+
+- Exported functions are documented, with good examples
+    - package uses `pkgdown` to generate a website
+    - documentation is spell-checked and coherent
+
+- Imports and dependencies are sensible and correctly specified
+
+---
+## Package: Full points requirements
+
+- Testing:
+    - 90% coverage with meaningful tests
+    
+    - Functions are well structured to make testing efficient
+    
+    - TravisCI (or Appveyor) integration
+    
+    - Codecov.io integration
+    
+    - Badges for test coverage and build status included in the README
+
+---
+## Package: Full points requirements
+
+- Data
+    - Include data in the package to demonstrate package functions
+    
+    - data is well documented
+    
+    - data is used in examples and the package vignette
+    
+For those of you wrapping APIs: include some sample data that can be used without an API key.
+
+
+---
+## Shiny App: Full Points
+
+- Installation instructions are well written    
+e.g. if your app requires other packages, you need to document that!
+
+- App loads and runs without problems
+
+- App demonstrates important pieces of your package
+
+- Multiple ways to interact with the app and UI is well designed
+
+- See [this blog post](https://deanattali.com/2015/04/21/r-package-shiny-app/) on including a Shiny app with your R package for suggestions
+
+---
+## Vignette: Full Points
+
+- Uses `pkgdown` and github `/docs` to host the package documentation and vignette
+
+- Report describes how to use the package to accomplish a task - integrating all of the functions into a single entity
+
+- Graphs and tables are well designed and have a clear goal. Some styling and formatting is used to communicate effectively.
+
+- Written text flows nicely, with correct spelling and grammar. 
+
+---
+## Other Notes: Functions
+
+- Documentation: 
+    - Functions should have a description paragraph in addition to the function's purpose. 
+    
+    - Parameters should be well documented. 
+    
+    - Remember to use `roxygen` tags! You do not want to generate Rd files by hand!
+
+- Functions should accomplish meaningful tasks
+
+- Imports and Exports: 
+    - Don't just import 5 whole packages in each function!
+    
+    - Export only functions you want the user to actually use
+    
+- Assertions are your friend! They will make testing easier and improve the user experience.
+
+---
+## Other Notes: Examples
+
+- Examples should be meaningful and should demonstrate multiple combinations of parameters.
+
+- Example code should include setup code, if necessary - e.g. you need to at least show how to do API authentication when running each function. `\dontrun{}` can be used to stop `devtools::check()` from running the example code. 
+
+
+---
+## Other Notes: Tests
+
+- Only two packages had non-default tests as of April 17... 
+
+- travisCI takes a while to get right. You're going to want to start on that before the last minute. 
+
+- codecov.io only works once travis is working.
+
+
+---
+## Other Notes: 
+
+- Only R files go in the `R/` directory
+
+- Shiny apps go in `inst/`
+
+- `*.rda` files go in `data/` with documentation in a .R file stored in `R/`    
+`usethis::use_data` is your friend
+
+- Most of you aren't using pkgdown yet... it will make your lives much easier!    
+Please don't hardcode your website. Let `pkgdown` do the work for you!!
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+---
+title: 'Lab Assignment #4: a shiny view of liquor purchases in Story County'
+author: "Heike Hofmann"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse
+## Deliverables
+
+There are two parts to this assignment:
+
+1. **Reading and cleaning the data** 
+    
+    - read data from API (just demonstrate)
+    - clean data
+    
+    - document reading and cleaning in the README Rmarkdown
+
+2. **Visualizing the data in a shiny app** 
+
+    - write a shiny app with (a) a spatial and (b) a temporal tab
+    
+        
+
+---
+class: inverse
+# Lab organization 
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE, echo = TRUE)
+```
+
+1. As a team create *one* github repository. Make sure to create a README file.
+Make all of the team members contributors (under `Settings` > `Collaborators`)
+
+2. Create a file README.Rmd - this is the file that you will submit at the end of the lab
+
+3. Include a link to the repository in the README.Rmd file
+
+4. Create a folder `data` in the repository. Assume that all of the data files used are inside this folder, similar to the code used in this Rmarkdown file.
+
+5. Create a folder `shiny` in the repository. This folder should include the `app.R` file for your shiny app. Calling your app with the command `runApp("shiny")` should work.
+
+
+---
+
+# The data
+
+As part of the Iowa's data portal data on all liquor sales in Iowa is published, resulting in more than 15 million sales since 2012: https://data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy
+
+A subset of the data with [sales from Story county](../data/story-sales.zip)  is available from our website 
+
+
+1. **Reading the data:** use the API provided by the data portal to get a subset for Story county data. 
+
+    Note: the API will only provide the first 1000 sales. You DO NOT have to go through the process of getting an APP token. Just show your work on the first 1000 observations.
+
+2. **Cleaning the data:** use the [county-level subset](../data/story-sales.zip) to work through cleaning aspects of the data you are using in the app later.
+
+
+**Include all code necessary to read and clean the data in the README Rmarkdown file and comment on each step.**
+
+---
+
+# The app
+
+Write a shiny app to help users explore the data.
+
+The app should have at least two tabs: one tab that summarizes a temporal and one tab that summarizes a spatial aspect in the data
+
+Each tab should show a visualization (you could look into `plotly` for an interactive visualization) and have at least two widgets to change an aspect of  what you show.
+
+
+<br>
+
+**Upload your README.Rmd file to Canvas. Only one submission per team is required. 
+Finishing touches can be made until Sunday, Apr 21, 10 pm.**
